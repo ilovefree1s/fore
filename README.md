@@ -5,6 +5,7 @@ card, show the group. Modeled on the FORE! Cards deck, for regular ball golf.
 
 - **Fore-Mat cards** set the format for the whole hole, then expire. Each is worth points.
 - **Power Up cards** go into your hand when drawn. Tap one, hit Play to show the group, then Discard.
+- **Scorecard** tab tracks points per hole per player, with running totals and a LEAD tag. Points, not strokes.
 
 ## Layout
 

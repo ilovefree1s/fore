@@ -73,15 +73,16 @@
 
   main {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 4px 16px; gap: 12px; min-height: 0;
+    padding: 4px 16px; gap: 12px; min-height: 0; overflow: hidden;
   }
   .card {
     --accent: #6c6a60;
     --accent-dark: #4a4840;
     --paper-a: #fbf7ea;
     --paper-b: #efe6cc;
-    width: min(100%, 360px, calc(58vh * 5 / 7));
+    width: min(100%, 360px);
     aspect-ratio: 5 / 7;
+    container-type: inline-size;
     color: var(--ink);
     border-radius: var(--radius);
     border: 1px solid rgba(0,0,0,.18);
@@ -137,20 +138,20 @@
     to   { transform: none; opacity: 1; }
   }
   .card .pile {
-    font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
+    font-size: 3.33cqw; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
   }
-  .card h2 { margin: 8px 0 14px; font-size: 32px; line-height: 1.05; }
+  .card h2 { margin: 8px 0 14px; font-size: 8.9cqw; line-height: 1.05; }
   .card h2::after {
     content: ''; display: block; width: 46px; height: 4px; border-radius: 2px;
     background: var(--accent); margin-top: 8px;
   }
   .card.format h2 { padding-right: 56px; }
-  .card .body { font-size: 18px; line-height: 1.4; overflow: auto; }
-  .card.long .body { font-size: 15px; line-height: 1.35; }
-  .card.long h2 { font-size: 26px; }
+  .card .body { font-size: 5cqw; line-height: 1.4; overflow: auto; }
+  .card.long .body { font-size: 4.17cqw; line-height: 1.35; }
+  .card.long h2 { font-size: 7.2cqw; }
   .card .body p { margin: 0 0 12px; }
   .card .body .label {
-    font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    font-size: 3.05cqw; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
     color: var(--muted); margin: 2px 0 4px;
   }
   .card .body ul { margin: 0 0 12px; padding-left: 18px; }
@@ -171,13 +172,13 @@
   .card .format {
     display: inline-block; margin: -4px 0 12px; padding: 3px 9px; border-radius: 6px;
     background: rgba(200,84,31,.12); color: var(--format);
-    font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    font-size: 3.33cqw; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
   }
   .card .foot { position: relative; }
-  .card.xlong .body { font-size: 13.5px; line-height: 1.3; }
+  .card.xlong .body { font-size: 3.75cqw; line-height: 1.3; }
   .card.xlong .body p, .card.xlong .body ul { margin-bottom: 8px; }
-  .card.xlong h2 { font-size: 22px; margin-bottom: 10px; }
-  .card .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
+  .card.xlong h2 { font-size: 6.1cqw; margin-bottom: 10px; }
+  .card .foot { margin-top: auto; font-size: 3.33cqw; color: var(--muted); }
   @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
 
   .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 48px; }
@@ -215,10 +216,14 @@
     display: inline-block; vertical-align: 1px;
   }
 
-  footer { padding: 4px 16px calc(14px + var(--safe-bottom)); }
-  .piles { display: flex; gap: 12px; }
+  /* ---- screens and nav ---- */
+  .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .screen[hidden] { display: none; }
+  .topdraw { padding: 2px 16px 6px; }
+  .bottomdraw { padding: 4px 16px 8px; }
+  .bottomdraw .draw { padding: 13px 12px; }
   .draw {
-    flex: 1; padding: 16px 12px; border-radius: var(--radius);
+    width: 100%; padding: 16px 12px; border-radius: var(--radius);
     color: #fff; font-weight: 800; font-size: 20px; letter-spacing: .02em;
     box-shadow: 0 6px 0 rgba(0,0,0,.3);
     display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -227,7 +232,69 @@
   .draw small { font-size: 12px; font-weight: 600; opacity: .85; }
   .draw.format { background: var(--format); }
   .draw.keeps { background: var(--keeps); }
-  .status { margin-top: 10px; text-align: center; font-size: 12px; opacity: .6; }
+  .draw.slim {
+    flex-direction: row; justify-content: center; gap: 10px;
+    padding: 11px 12px; font-size: 16px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3);
+  }
+  .draw.slim:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  nav { padding: 8px 16px calc(10px + var(--safe-bottom)); background: rgba(0,0,0,.22); }
+  nav .tabs { display: flex; gap: 8px; }
+  nav .tabs button {
+    flex: 1; padding: 11px; border-radius: 12px; font-weight: 800; font-size: 15px;
+    background: rgba(255,255,255,.1); color: var(--cream);
+  }
+  nav .tabs button.on { background: var(--cream); color: var(--felt-deep); }
+  .status { margin-top: 6px; text-align: center; font-size: 11px; opacity: .55; }
+
+  /* ---- scorecard ---- */
+  #screen-score { overflow: auto; padding: 4px 16px 8px; }
+  .holehead { display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; }
+  .step {
+    width: 44px; height: 44px; border-radius: 12px; flex: 0 0 auto;
+    background: rgba(255,255,255,.14); color: var(--cream);
+    font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  .step:disabled { opacity: .3; }
+  .step:active:not(:disabled) { filter: brightness(1.2); }
+  .hole-title { flex: 1; text-align: center; min-width: 0; }
+  .hole-title strong { display: block; font-size: 22px; letter-spacing: .12em; }
+  .hole-title span { font-size: 12px; opacity: .7; letter-spacing: .1em; }
+  .player {
+    background: rgba(255,255,255,.1); border-radius: 14px; padding: 10px 10px 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .player.lead { background: rgba(224,185,74,.2); box-shadow: inset 0 0 0 2px var(--gold); }
+  .player .grow { flex: 1; min-width: 0; }
+  .player .name { font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player .sub { font-size: 12px; opacity: .8; margin-top: 3px; display: flex; gap: 8px; align-items: center; }
+  .lead-tag { background: var(--gold); color: var(--ink); font-size: 9px; font-weight: 900; letter-spacing: .12em; padding: 2px 6px; border-radius: 4px; }
+  .steps { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+  .steps .num { width: 40px; text-align: center; font-size: 24px; font-weight: 900; }
+  .steps .num.zero { opacity: .35; }
+  .steps .step { width: 40px; height: 40px; font-size: 22px; }
+  .steps .step.plus { background: var(--format); }
+  .steps .step.minus { background: rgba(255,255,255,.14); }
+  .player .x {
+    width: 34px; height: 34px; border-radius: 50%; background: rgba(200,84,31,.9); color: #fff;
+    font-size: 18px; font-weight: 800; flex: 0 0 auto;
+  }
+  .scoretools { display: flex; gap: 8px; margin: 4px 0 10px; }
+  .scoretools button {
+    flex: 1; padding: 10px; border-radius: 12px; background: rgba(255,255,255,.12); color: var(--cream);
+    font-weight: 700; font-size: 14px;
+  }
+  .scoretools button.on { background: var(--cream); color: var(--felt-deep); }
+  .holestrip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
+  .holestrip::-webkit-scrollbar { display: none; }
+  .holechip {
+    flex: 0 0 auto; width: 48px; padding: 6px 0; border-radius: 10px;
+    background: rgba(255,255,255,.1); color: var(--cream); text-align: center;
+  }
+  .holechip strong { display: block; font-size: 15px; }
+  .holechip span { font-size: 10px; opacity: .7; }
+  .holechip.done { background: rgba(255,255,255,.22); }
+  .holechip.on { background: var(--cream); color: var(--felt-deep); }
+  .hint { font-size: 12px; opacity: .65; text-align: center; margin: 6px 0; }
 </style>
 </head>
 <body>
@@ -245,29 +312,38 @@
   </div>
 </header>
 
-<main>
-  <div id="card" class="card empty">Draw a Fore-Mat card to start the hole.</div>
-  <div id="actions" class="actions"></div>
-</main>
-
-<div id="hand" class="hand empty">
-  <div class="title">Your hand · <span id="hand-count"></span></div>
-  <div id="strip" class="strip"></div>
-</div>
-
-<footer>
-  <div class="piles">
-    <button id="draw-format" class="draw format" type="button">Fore-Mat<small id="count-format"></small></button>
+<section id="screen-cards" class="screen">
+  <div class="topdraw">
+    <button id="draw-format" class="draw format slim" type="button"><span>Draw Fore-Mat</span><small id="count-format"></small></button>
+  </div>
+  <main>
+    <div id="card" class="card empty">Draw a Fore-Mat card to start the hole.</div>
+    <div id="actions" class="actions"></div>
+  </main>
+  <div id="hand" class="hand empty">
+    <div class="title">Your hand · <span id="hand-count"></span></div>
+    <div id="strip" class="strip"></div>
+  </div>
+  <div class="bottomdraw">
     <button id="draw-keeps" class="draw keeps" type="button">Power Up<small id="count-keeps"></small></button>
   </div>
+</section>
+
+<section id="screen-score" class="screen" hidden></section>
+
+<nav>
+  <div class="tabs">
+    <button id="tab-cards" class="on" type="button">Cards</button>
+    <button id="tab-score" type="button">Scorecard</button>
+  </div>
   <div class="status"><span id="version"></span> · <span id="offline">checking offline support</span></div>
-</footer>
+</nav>
 
 <script id="cards-data" type="application/json">[{"id":"format:four-ball","pile":"format","title":"Four Ball","points":"1","format":"2v2","count":1,"body":[{"type":"p","text":"The card player chooses a partner. All four players play their own ball for the entire hole."},{"type":"list","label":"Scoring","items":["Compare the lowest score from each team. Lower score earns 1 point.","If the low scores tie, compare the higher score from each team. Lower score earns the point.","If both are tied, no point."]}]},{"id":"format:scramble","pile":"format","title":"Scramble","points":"1","format":"2v2","count":2,"body":[{"type":"p","text":"The card player chooses a partner. Each team plays one team score."},{"type":"list","label":"Rules","items":["Both teammates hit.","The team chooses the preferred shot and both players hit from there.","Continue until the hole is completed."]},{"type":"list","label":"Scoring","items":["Lowest team score earns 1 point. A tie awards no point."]}]},{"id":"format:worst-ball-scramble","pile":"format","title":"Worst Ball Scramble","points":"1","format":"2v2","count":1,"body":[{"type":"p","text":"The card player chooses a partner. Each team plays one team score."},{"type":"list","label":"Rules","items":["Both teammates hit each shot.","The opposing team chooses which of the two shots you must play from. They will usually pick the worse one.","Continue until the hole is completed."]},{"type":"list","label":"Scoring","items":["Lowest team score earns 1 point. A tie awards no point."]}]},{"id":"format:reversal","pile":"format","title":"Reversal","points":"1","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball."},{"type":"list","label":"Required Clubs","items":["Tee shot: wedge.","Second shot: 6, 7, 8, or 9 iron.","Third shot: 3, 4, or 5 iron.","Finish the hole with a wood or driver."]},{"type":"list","label":"Scoring","items":["Lowest score earns 1 point."]}]},{"id":"format:bingo-bango-bongo","pile":"format","title":"Bingo-Bango-Bongo","points":"3","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball. The player furthest from the hole always hits first. Three separate points are available."},{"type":"list","label":"Bingo","items":["1 point to the first player to reach the green."]},{"type":"list","label":"Bango","items":["Once everyone is on the green, 1 point to the player closest to the pin."]},{"type":"list","label":"Bongo","items":["1 point to the first player to make a putt."]}]},{"id":"format:pick-3","pile":"format","title":"Pick 3!","points":"1","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball. Before the hole begins, each player chooses exactly 3 clubs."},{"type":"list","label":"Rules","items":["Those are the only 3 clubs that player may use for the entire hole."]},{"type":"list","label":"Scoring","items":["Lowest score earns 1 point."]}]},{"id":"format:alternate-shot","pile":"format","title":"Alternate Shot","points":"1","format":"2v2","count":1,"body":[{"type":"p","text":"The card player chooses a partner. Each team uses only one ball."},{"type":"list","label":"Rules","items":["Teammates alternate hitting shots.","Each player plays from wherever their teammate's shot finished.","Keep alternating until the ball is holed."]},{"type":"list","label":"Scoring","items":["Lowest team score earns 1 point. A tie awards no point."]}]},{"id":"format:wild-card-bitches","pile":"format","title":"Wild Card, Bitches!","points":"1-2","format":"Player's choice","count":1,"body":[{"type":"p","text":"The card player chooses any Fore-Mat in the deck and decides whether the hole is worth 1 point or 2 points."},{"type":"list","label":"Pick From","items":["Scramble","Shamble","Alternate Shot","Four Ball","Hi/Lo","Bingo-Bango-Bongo","Worst Ball Scramble","Wolf","One Club","Pick 3","Tin Cup","Reversal","Box Pick","Random Partner","Double Match","Wait Fore It","Heavy Is The Head"]}]},{"id":"format:box-pick","pile":"format","title":"Box Pick","points":"1","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball, and every player tees off from a different tee box."},{"type":"list","label":"Tee Selection Order","items":["Last place chooses their tee box first.","Then third place, then second place.","First place gets what is left, usually the tips.","If standings are tied, flip a tee or coin."]},{"type":"list","label":"Scoring","items":["Lowest score earns 1 point."]}]},{"id":"format:hi-lo","pile":"format","title":"Hi/Lo","points":"2","format":"2v2","count":1,"body":[{"type":"p","text":"The card player chooses a partner. Every player plays their own ball. Two separate points are available."},{"type":"list","label":"Low","items":["Compare the lower score from each team. Lower score earns 1 point."]},{"type":"list","label":"High","items":["Compare the higher score from each team. Lower score earns 1 point."]},{"type":"list","label":"Ties","items":["A tied comparison awards no point."]}]},{"id":"format:shamble","pile":"format","title":"Shamble","points":"1","format":"2v2","count":2,"body":[{"type":"p","text":"The card player chooses a partner. Each team records two individual scores."},{"type":"list","label":"Rules","items":["Both teammates hit a tee shot and the team picks the better one.","Both players move to that spot.","From there, each player plays their own ball to the hole."]},{"type":"list","label":"Scoring","items":["Add both teammates' scores together.","Lowest combined score earns 1 point. A tie awards no point."]}]},{"id":"format:tin-cup","pile":"format","title":"Tin Cup","points":"1","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball."},{"type":"list","label":"Rules","items":["Every player must use a 7 iron for the entire hole."]},{"type":"list","label":"Scoring","items":["Lowest score earns 1 point."]}]},{"id":"format:one-club","pile":"format","title":"One Club","points":"1","format":"1v1v1v1","count":1,"body":[{"type":"p","text":"Every player plays their own ball. The card player chooses one club, and every player must use that same club for the hole."},{"type":"list","label":"Rules","items":["The chosen club must be used for every shot that is not a putt.","Players may still use their putter on the green."]},{"type":"list","label":"Scoring","items":["Lowest score earns 1 point."]}]},{"id":"format:wait-fore-it","pile":"format","title":"Wait Fore It","points":"1","format":"2v2","count":1,"body":[{"type":"p","text":"Everyone hits their tee shot before the card player chooses a partner."},{"type":"list","label":"Rules","items":["After seeing all four tee shots, the card player picks their partner.","The other two players become the opposing team."]},{"type":"list","label":"Scoring","items":["Each team records one team score. Lowest team score earns 1 point."]}]},{"id":"format:random-partner","pile":"format","title":"Random Partner","points":"1","format":"2v2","count":1,"body":[{"type":"p","text":"The card player gets a randomly selected partner. The other two players form the opposing team."},{"type":"list","label":"Scoring","items":["Each team records one team score. Lowest team score earns 1 point."]}]},{"id":"format:double-match","pile":"format","title":"Double Match","points":"2","format":"Two 1v1 matches","count":1,"body":[{"type":"p","text":"Two separate head-to-head matches are played on this hole."},{"type":"list","label":"Matches","items":["Match 1: first place vs. second place.","Match 2: third place vs. fourth place.","If a tie between second and third makes the matchups unclear, flip a tee or coin."]},{"type":"list","label":"Scoring","items":["Lowest score in each match earns 1 point. 2 points total."]}]},{"id":"format:heavy-is-the-head","pile":"format","title":"Heavy Is The Head","points":"1","format":"1v3","count":1,"body":[{"type":"p","text":"The player currently in first place plays alone against the other three as a team. Play the hole as a best-ball match."},{"type":"list","label":"Rules","items":["If multiple players are tied for first, flip a tee or coin to decide who plays alone.","Cannot be played on hole 1. If drawn there, draw another Fore-Mat card."]},{"type":"list","label":"Scoring","items":["Every player on the winning side earns 1 point."]}]},{"id":"format:wolf","pile":"format","title":"Wolf!","points":"1-3","format":"1v3 or 2v2","count":1,"body":[{"type":"p","text":"The card player is the Wolf. Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone."},{"type":"list","label":"Lone Wolf","items":["The Wolf plays alone against the other three.","Wolf beats or ties the best of the other three: Wolf earns 3 points.","Wolf loses: each of the other three earns 1 point."]},{"type":"list","label":"Choose a Partner","items":["The Wolf picks one partner. The other two form the opposing team.","The team with the lowest combined score earns 1 point."]}]},{"id":"keeps:attack-throw","pile":"keeps","title":"Attack Throw!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Throw an opponent's ball in any direction using your non-dominant hand."},{"type":"list","label":"Restrictions","items":["Cannot be used if the opponent's ball is on the green."]}]},{"id":"keeps:dominant-arm-throw","pile":"keeps","title":"Dominant Arm Throw!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Advance your ball by throwing it with your dominant arm."},{"type":"list","label":"Restrictions","items":["Cannot be used once the ball is on the green."]},{"type":"list","label":"Scramble/Shamble Rule","items":["Does not count as a stroke.","You must use the card from your own ball.","After the throw, both partners may play from the resulting location."]}]},{"id":"keeps:texas-wedge","pile":"keeps","title":"Texas Wedge!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to any player who is within 50 yards of the green."},{"type":"p","text":"That player must use their putter for their next shot."}]},{"id":"keeps:fore-tune-teller","pile":"keeps","title":"Fore-Tune Teller!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Roll your ball toward the hole before putting to get a read on the green."}]},{"id":"keeps:step-back","pile":"keeps","title":"Step Back!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player."},{"type":"p","text":"Choose any direction and make that player take 10 steps from their current lie. Their ball is moved to that new location."},{"type":"list","label":"Restrictions","items":["Cannot be used if the ball is on the green."]}]},{"id":"keeps:repeat","pile":"keeps","title":"Repeat!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player immediately after they hit a shot."},{"type":"p","text":"They must use the exact same club for their next shot."},{"type":"list","label":"Restrictions","items":["Cannot be used after a made putt."]}]},{"id":"keeps:guard-rail","pile":"keeps","title":"Guard Rail!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Lay the flagstick flat on the green and use it as a guide rail or backstop for any shot or putt."}]},{"id":"keeps:step-up","pile":"keeps","title":"Step Up!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Line your ball up directly toward the flagstick and take 10 steps forward."},{"type":"list","label":"Restrictions","items":["Cannot be used if the ball is already on the green.","If your 10 steps would take you onto the green, stop at the edge of the green and place the ball there."]}]},{"id":"keeps:no-putter","pile":"keeps","title":"No Putter!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player."},{"type":"p","text":"That player is not allowed to use a putter for the entire hole. They may still putt, but must use another club."}]},{"id":"keeps:drive-swap","pile":"keeps","title":"Drive Swap!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Swap your tee shot with the tee shot of any other player."},{"type":"list","label":"Restrictions","items":["Your ball must still be in play.","Your tee shot must have traveled at least 100 yards from the tee box."]}]},{"id":"keeps:movin-on-back","pile":"keeps","title":"Movin' On Back!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player."},{"type":"p","text":"That player must tee off from the back tees for the hole."}]},{"id":"keeps:movin-on-up","pile":"keeps","title":"Movin' On Up!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Move up to the next closest tee box for the hole."}]},{"id":"keeps:mulligan","pile":"keeps","title":"Mulligan!","points":null,"format":null,"count":4,"body":[{"type":"p","text":"Take a free do-over of any shot."},{"type":"p","text":"If the second shot is worse than the first one, that's your problem."}]},{"id":"keeps:no-practice-swings","pile":"keeps","title":"No Practice Swings!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player."},{"type":"p","text":"That player is not allowed to take any practice swings for the entire hole."},{"type":"list","label":"Penalty","items":["Any type of practice swing results in a 1-point penalty."]}]},{"id":"keeps:foot-wedge","pile":"keeps","title":"Foot Wedge!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Advance your ball by kicking it with your foot."},{"type":"list","label":"Restrictions","items":["Cannot be used once the ball is on the green."]},{"type":"list","label":"Scramble/Shamble Rule","items":["Does not count as a stroke.","You must use the card from your own ball.","After the kick, both partners may play from the resulting location."]}]},{"id":"keeps:obstacle","pile":"keeps","title":"Obstacle!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Place a tee or divot repair tool on the green between an opponent's ball and the hole."},{"type":"list","label":"Restrictions","items":["The obstacle must be at least 1 foot away from the opponent's ball.","The obstacle must be at least 1 foot away from the hole."]}]},{"id":"keeps:putt-pass","pile":"keeps","title":"Putt Pass!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Hit a putt, then hit the ball one additional time while it is still moving."},{"type":"list","label":"Partner Rule","items":["If playing with a partner, you may instead pass the moving ball to your partner and let them hit it."]}]},{"id":"keeps:re-do","pile":"keeps","title":"Re-Do!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Give this card to another player immediately after they hit a shot."},{"type":"p","text":"They must replay the shot. Basically a reverse Mulligan."}]},{"id":"keeps:tee-up","pile":"keeps","title":"Tee Up!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Tee your ball up from anywhere for your next shot."}]},{"id":"keeps:cut-the-putt","pile":"keeps","title":"Cut The Putt!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Cut the distance of any putt in half."},{"type":"p","text":"Move the ball halfway closer to the hole before putting."}]},{"id":"keeps:free-drop","pile":"keeps","title":"Free Drop!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Take a free drop from a hazard or out-of-bounds area."}]},{"id":"keeps:auto-fairway","pile":"keeps","title":"Auto Fairway!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Move your tee shot to the closest point on the fairway."}]},{"id":"keeps:lip-out","pile":"keeps","title":"Lip Out!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"If your putt catches any part of the hole but does not go in, play this card and the putt counts as made."}]},{"id":"keeps:i-ll-have-what-he-s-having","pile":"keeps","title":"I'll Have What He's Having!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"If your drive is bad, move your ball to the location of another player's good drive."}]},{"id":"keeps:air-horn","pile":"keeps","title":"Air Horn!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Distract another player during their swing."}]},{"id":"keeps:bowl-putt","pile":"keeps","title":"Bowl Putt!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Roll the ball underhand toward the hole."},{"type":"list","label":"Restrictions","items":["Must be used from the green or fringe."]},{"type":"list","label":"Scoring","items":["The roll does not count as a stroke."]}]},{"id":"keeps:non-dominant-arm-throw","pile":"keeps","title":"Non-Dominant Arm Throw!","points":null,"format":null,"count":1,"body":[{"type":"p","text":"Advance your ball by throwing it with your non-dominant arm."},{"type":"list","label":"Restrictions","items":["Cannot be used once the ball is on the green."]},{"type":"list","label":"Scramble/Shamble Rule","items":["Does not count as a stroke.","You must use the card from your own ball.","After the throw, both partners may play from the resulting location."]}]}]</script>
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.16';
+  var VERSION = '0.1.19';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -420,7 +496,18 @@
     }
     var on = stripEl.querySelector('.chip.on');
     if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+    fitCard();
   }
+  // The card is as big as the space left between the draw buttons allows,
+  // at a 5:7 ratio, capped at 360px wide.
+  var mainEl = document.querySelector('main');
+  function fitCard() {
+    var actionsH = actionsEl.childElementCount ? actionsEl.offsetHeight + 12 : 0;
+    var avail = mainEl.clientHeight - 8 - actionsH;
+    var w = Math.min(360, mainEl.clientWidth - 32, Math.floor(avail * 5 / 7));
+    if (w > 0) cardEl.style.width = w + 'px';
+  }
+  window.addEventListener('resize', fitCard);
 
   function drawFormat() {
     if (!state.format.length) state.format = shuffledPile('format');
@@ -462,16 +549,172 @@
     render(true);
   }
   function newRound() {
-    if (state.hand.length && !confirm('Start a new round? This clears your hand and reshuffles both piles.')) return;
+    if (!confirm('Start a new round? This reshuffles both piles, clears your hand, and clears the scorecard. Player names stay.')) return;
     state = freshState();
     save();
     render(true);
+    score.scores = emptyScores(score.players.length);
+    score.hole = 0;
+    scoreEdit = false;
+    saveScore();
+    renderScore();
   }
   document.getElementById('draw-format').addEventListener('click', drawFormat);
   document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
   document.getElementById('shuffle').addEventListener('click', newRound);
   document.getElementById('version').textContent = 'v' + VERSION;
   render(false);
+
+  // ---------- Scorecard ----------
+  // Points, not strokes. Most holes hand out 1 to 3 points to one or two
+  // people and 0 to everyone else, so every cell starts at 0 and the
+  // stepper is the whole interface. Negative is allowed for penalties.
+  var SCORE_KEY = 'fore.score.v1';
+  var HOLES = 18;
+  var scoreEl = document.getElementById('screen-score');
+  function emptyScores(n) {
+    var out = [];
+    for (var h = 0; h < HOLES; h++) {
+      var row = [];
+      for (var i = 0; i < n; i++) row.push(0);
+      out.push(row);
+    }
+    return out;
+  }
+  function freshScore(names) {
+    var players = names || ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+    return { players: players, scores: emptyScores(players.length), hole: 0 };
+  }
+  function loadScore() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SCORE_KEY));
+      if (!s || !Array.isArray(s.players) || !s.players.length || !Array.isArray(s.scores) || s.scores.length !== HOLES) return null;
+      s.players = s.players.map(function (n) { return String(n); });
+      s.scores = s.scores.map(function (row) {
+        row = Array.isArray(row) ? row.slice(0, s.players.length) : [];
+        while (row.length < s.players.length) row.push(0);
+        return row.map(function (v) { return typeof v === 'number' && isFinite(v) ? v : 0; });
+      });
+      s.hole = Math.min(Math.max(0, s.hole | 0), HOLES - 1);
+      return s;
+    } catch (e) { return null; }
+  }
+  var score = loadScore() || freshScore();
+  var scoreEdit = false;
+  function saveScore() {
+    try { localStorage.setItem(SCORE_KEY, JSON.stringify(score)); } catch (e) {}
+  }
+  function totalFor(i) {
+    var t = 0;
+    for (var h = 0; h < HOLES; h++) t += score.scores[h][i];
+    return t;
+  }
+  function holeTotal(h) {
+    return score.scores[h].reduce(function (a, b) { return a + b; }, 0);
+  }
+  function anyPoints() {
+    for (var h = 0; h < HOLES; h++) if (holeTotal(h) !== 0) return true;
+    return false;
+  }
+  function renderScore() {
+    var s = score, h = s.hole;
+    var totals = s.players.map(function (_, i) { return totalFor(i); });
+    var best = Math.max.apply(null, totals);
+    var html = '<div class="holehead">' +
+      '<button class="step" data-act="hole" data-n="' + (h - 1) + '"' + (h > 0 ? '' : ' disabled') + '>&lsaquo;</button>' +
+      '<div class="hole-title"><strong>HOLE ' + (h + 1) + '</strong>' +
+      '<span>' + (holeTotal(h) ? holeTotal(h) + ' PT' + (holeTotal(h) === 1 ? '' : 'S') + ' AWARDED' : 'NO POINTS YET') + ' &middot; OF ' + HOLES + '</span></div>' +
+      '<button class="step" data-act="hole" data-n="' + (h + 1) + '"' + (h < HOLES - 1 ? '' : ' disabled') + '>&rsaquo;</button>' +
+      '</div>';
+    s.players.forEach(function (name, i) {
+      var v = s.scores[h][i];
+      var lead = best > 0 && totals[i] === best;
+      html += '<div class="player' + (lead ? ' lead' : '') + '">' +
+        '<div class="grow" data-act="rename" data-i="' + i + '">' +
+        '<div class="name">' + esc(name) + '</div>' +
+        '<div class="sub">' + (lead ? '<span class="lead-tag">LEAD</span>' : '') +
+        '<span>' + totals[i] + ' total</span></div></div>' +
+        (scoreEdit
+          ? '<button class="x" data-act="remove" data-i="' + i + '" aria-label="Remove">&times;</button>'
+          : '<div class="steps">' +
+            '<button class="step minus" data-act="pt" data-i="' + i + '" data-n="-1">&minus;</button>' +
+            '<div class="num' + (v === 0 ? ' zero' : '') + '">' + v + '</div>' +
+            '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
+            '</div>') +
+        '</div>';
+    });
+    html += '<div class="scoretools">' +
+      '<button data-act="add">+ Add player</button>' +
+      '<button data-act="edit"' + (scoreEdit ? ' class="on"' : '') + '>' + (scoreEdit ? 'Done' : 'Edit players') + '</button>' +
+      '<button data-act="clear">Clear scores</button>' +
+      '</div>' +
+      '<div class="hint">' + (scoreEdit ? 'Tap a name to rename it. Tap &times; to remove a player.' : 'Tap a name to rename. Points are per hole, totals run on the right.') + '</div>' +
+      '<div class="holestrip" id="holestrip">';
+    for (var hc = 0; hc < HOLES; hc++) {
+      var t = holeTotal(hc);
+      html += '<button class="holechip' + (hc === h ? ' on' : '') + (t ? ' done' : '') + '" data-act="hole" data-n="' + hc + '">' +
+        '<strong>' + (hc + 1) + '</strong><span>' + (t ? t + ' pt' + (t === 1 ? '' : 's') : '&ndash;') + '</span></button>';
+    }
+    html += '</div>';
+    scoreEl.innerHTML = html;
+    var on = scoreEl.querySelector('.holechip.on');
+    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+  scoreEl.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-act]');
+    if (!el || !scoreEl.contains(el)) return;
+    var act = el.getAttribute('data-act');
+    var i = Number(el.getAttribute('data-i'));
+    var n = Number(el.getAttribute('data-n'));
+    if (act === 'hole') {
+      if (n < 0 || n >= HOLES) return;
+      score.hole = n;
+    } else if (act === 'pt') {
+      score.scores[score.hole][i] += n;
+    } else if (act === 'rename') {
+      var name = prompt('Player name', score.players[i]);
+      if (name == null) return;
+      name = name.trim();
+      if (!name) return;
+      score.players[i] = name;
+    } else if (act === 'add') {
+      var newName = prompt('New player name', 'Player ' + (score.players.length + 1));
+      if (newName == null) return;
+      newName = newName.trim() || ('Player ' + (score.players.length + 1));
+      score.players.push(newName);
+      score.scores.forEach(function (row) { row.push(0); });
+    } else if (act === 'remove') {
+      if (score.players.length <= 1) return;
+      if (totalFor(i) !== 0 && !confirm('Remove ' + score.players[i] + '? Their points go with them.')) return;
+      score.players.splice(i, 1);
+      score.scores.forEach(function (row) { row.splice(i, 1); });
+    } else if (act === 'edit') {
+      scoreEdit = !scoreEdit;
+    } else if (act === 'clear') {
+      if (anyPoints() && !confirm('Clear every score? Names stay.')) return;
+      score.scores = emptyScores(score.players.length);
+      score.hole = 0;
+    }
+    saveScore();
+    renderScore();
+  });
+
+  // ---------- Tabs ----------
+  var TAB_KEY = 'fore.tab';
+  function showTab(name) {
+    var cards = name !== 'score';
+    document.getElementById('screen-cards').hidden = !cards;
+    scoreEl.hidden = cards;
+    document.getElementById('tab-cards').classList.toggle('on', cards);
+    document.getElementById('tab-score').classList.toggle('on', !cards);
+    if (!cards) renderScore();
+    try { localStorage.setItem(TAB_KEY, cards ? 'cards' : 'score'); } catch (e) {}
+  }
+  document.getElementById('tab-cards').addEventListener('click', function () { showTab('cards'); });
+  document.getElementById('tab-score').addEventListener('click', function () { showTab('score'); });
+  var savedTab = null;
+  try { savedTab = localStorage.getItem(TAB_KEY); } catch (e) {}
+  showTab(savedTab === 'score' ? 'score' : 'cards');
 
   // Install prompt (Android/desktop Chrome). iOS uses Share > Add to Home Screen.
   var installBtn = document.getElementById('install');
