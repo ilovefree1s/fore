@@ -67,7 +67,7 @@ Scoring:
 format: 1v1v1v1
 points: 1
 
-Every player plays their own ball, with the bag turned upside down.
+Every player plays their own ball.
 
 Required Clubs:
 - Tee shot: wedge.
