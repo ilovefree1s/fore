@@ -1,0 +1,10 @@
+{
+  "name": "fore",
+  "version": "0.0.0",
+  "private": true,
+  "description": "FORE golf card game: single-file offline PWA",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node serve.js"
+  }
+}
