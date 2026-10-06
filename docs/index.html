@@ -274,10 +274,6 @@
   .steps .step { width: 40px; height: 40px; font-size: 22px; }
   .steps .step.plus { background: var(--format); }
   .steps .step.minus { background: rgba(255,255,255,.14); }
-  .player .x {
-    width: 34px; height: 34px; border-radius: 50%; background: rgba(200,84,31,.9); color: #fff;
-    font-size: 18px; font-weight: 800; flex: 0 0 auto;
-  }
   .scoretools { display: flex; gap: 8px; margin: 4px 0 10px; }
   .scoretools button {
     flex: 1; padding: 10px; border-radius: 12px; background: rgba(255,255,255,.12); color: var(--cream);
@@ -312,9 +308,6 @@
     border-radius: 12px; border: 0; background: var(--cream); color: var(--ink);
   }
   .namerow input::placeholder { color: #a8a497; font-weight: 600; }
-  .namerow .x { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.14); color: var(--cream); font-size: 20px; font-weight: 800; flex: 0 0 auto; }
-  .namerow .x:disabled { opacity: .25; }
-  .modal .addrow { margin: 10px 0 0; padding: 12px; border-radius: 12px; background: rgba(255,255,255,.12); color: var(--cream); font-weight: 700; }
   .modal .spacer { flex: 1; min-height: 16px; }
   .modal .go { padding: 16px; border-radius: 14px; background: var(--gold); color: var(--ink); font-weight: 900; font-size: 18px; }
   .modal .cancel { margin-top: 8px; padding: 12px; border-radius: 12px; background: transparent; color: var(--cream); font-weight: 700; opacity: .8; }
@@ -358,9 +351,8 @@
 
 <div id="setup" class="modal" hidden>
   <h2>Who's playing?</h2>
-  <p class="sub">Names go on the scorecard. Tee order is up to you.</p>
+  <p class="sub">Four players. Names go on the scorecard.</p>
   <div id="names" class="names"></div>
-  <button id="setup-add" class="addrow" type="button">+ Add player</button>
   <div class="spacer"></div>
   <button id="setup-go" class="go" type="button">Start round</button>
   <button id="setup-cancel" class="cancel" type="button">Cancel</button>
@@ -379,7 +371,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.20';
+  var VERSION = '0.1.21';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -591,8 +583,7 @@
     state = freshState();
     save();
     render(true);
-    score = { players: names, scores: emptyScores(names.length), hole: 0 };
-    scoreEdit = false;
+    score = freshScore(names);
     saveScore();
     renderScore();
     showTab('cards');
@@ -619,18 +610,20 @@
     }
     return out;
   }
+  var PLAYERS = 4;
   function freshScore(names) {
-    var players = names || ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
-    return { players: players, scores: emptyScores(players.length), hole: 0 };
+    var players = [];
+    for (var i = 0; i < PLAYERS; i++) players.push(names && names[i] ? String(names[i]) : 'Player ' + (i + 1));
+    return { players: players, scores: emptyScores(PLAYERS), hole: 0 };
   }
   function loadScore() {
     try {
       var s = JSON.parse(localStorage.getItem(SCORE_KEY));
-      if (!s || !Array.isArray(s.players) || !s.players.length || !Array.isArray(s.scores) || s.scores.length !== HOLES) return null;
-      s.players = s.players.map(function (n) { return String(n); });
+      if (!s || !Array.isArray(s.players) || !Array.isArray(s.scores) || s.scores.length !== HOLES) return null;
+      s.players = freshScore(s.players).players;
       s.scores = s.scores.map(function (row) {
-        row = Array.isArray(row) ? row.slice(0, s.players.length) : [];
-        while (row.length < s.players.length) row.push(0);
+        row = Array.isArray(row) ? row.slice(0, PLAYERS) : [];
+        while (row.length < PLAYERS) row.push(0);
         return row.map(function (v) { return typeof v === 'number' && isFinite(v) ? v : 0; });
       });
       s.hole = Math.min(Math.max(0, s.hole | 0), HOLES - 1);
@@ -638,7 +631,6 @@
     } catch (e) { return null; }
   }
   var score = loadScore() || freshScore();
-  var scoreEdit = false;
   function saveScore() {
     try { localStorage.setItem(SCORE_KEY, JSON.stringify(score)); } catch (e) {}
   }
@@ -672,21 +664,16 @@
         '<div class="name">' + esc(name) + '</div>' +
         '<div class="sub">' + (lead ? '<span class="lead-tag">LEAD</span>' : '') +
         '<span>' + totals[i] + ' total</span></div></div>' +
-        (scoreEdit
-          ? '<button class="x" data-act="remove" data-i="' + i + '" aria-label="Remove">&times;</button>'
-          : '<div class="steps">' +
-            '<button class="step minus" data-act="pt" data-i="' + i + '" data-n="-1">&minus;</button>' +
-            '<div class="num' + (v === 0 ? ' zero' : '') + '">' + v + '</div>' +
-            '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
-            '</div>') +
-        '</div>';
+        '<div class="steps">' +
+        '<button class="step minus" data-act="pt" data-i="' + i + '" data-n="-1">&minus;</button>' +
+        '<div class="num' + (v === 0 ? ' zero' : '') + '">' + v + '</div>' +
+        '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
+        '</div></div>';
     });
     html += '<div class="scoretools">' +
-      '<button data-act="add">+ Add player</button>' +
-      '<button data-act="edit"' + (scoreEdit ? ' class="on"' : '') + '>' + (scoreEdit ? 'Done' : 'Edit players') + '</button>' +
       '<button data-act="clear">Clear scores</button>' +
       '</div>' +
-      '<div class="hint">' + (scoreEdit ? 'Tap a name to rename it. Tap &times; to remove a player.' : 'Tap a name to rename. Points are per hole, totals run on the right.') + '</div>' +
+      '<div class="hint">Tap a name to rename. Points are per hole, totals run under each name.</div>' +
       '<div class="holestrip" id="holestrip">';
     for (var hc = 0; hc < HOLES; hc++) {
       var t = holeTotal(hc);
@@ -715,22 +702,9 @@
       name = name.trim();
       if (!name) return;
       score.players[i] = name;
-    } else if (act === 'add') {
-      var newName = prompt('New player name', 'Player ' + (score.players.length + 1));
-      if (newName == null) return;
-      newName = newName.trim() || ('Player ' + (score.players.length + 1));
-      score.players.push(newName);
-      score.scores.forEach(function (row) { row.push(0); });
-    } else if (act === 'remove') {
-      if (score.players.length <= 1) return;
-      if (totalFor(i) !== 0 && !confirm('Remove ' + score.players[i] + '? Their points go with them.')) return;
-      score.players.splice(i, 1);
-      score.scores.forEach(function (row) { row.splice(i, 1); });
-    } else if (act === 'edit') {
-      scoreEdit = !scoreEdit;
     } else if (act === 'clear') {
       if (anyPoints() && !confirm('Clear every score? Names stay.')) return;
-      score.scores = emptyScores(score.players.length);
+      score.scores = emptyScores(PLAYERS);
       score.hole = 0;
     }
     saveScore();
@@ -760,31 +734,18 @@
         var next = namesEl.querySelectorAll('input')[i + 1];
         if (next) next.focus(); else input.blur();
       });
-      var x = document.createElement('button');
-      x.type = 'button';
-      x.className = 'x';
-      x.textContent = '×';
-      x.disabled = setupNames.length <= 1;
-      x.addEventListener('click', function () { setupNames.splice(i, 1); renderSetup(); });
       row.appendChild(input);
-      row.appendChild(x);
       namesEl.appendChild(row);
     });
   }
   function openSetup(names) {
-    setupNames = (names && names.length ? names : ['', '', '', '']).map(String);
+    setupNames = ['', '', '', ''].map(function (_, i) { return names && names[i] ? String(names[i]) : ''; });
     renderSetup();
     setupEl.hidden = false;
     var first = namesEl.querySelector('input');
     if (first && !first.value) first.focus();
   }
   function closeSetup() { setupEl.hidden = true; }
-  document.getElementById('setup-add').addEventListener('click', function () {
-    setupNames.push('');
-    renderSetup();
-    var inputs = namesEl.querySelectorAll('input');
-    inputs[inputs.length - 1].focus();
-  });
   document.getElementById('setup-cancel').addEventListener('click', closeSetup);
   document.getElementById('setup-go').addEventListener('click', function () {
     var names = setupNames.map(function (n, i) { return n.trim() || ('Player ' + (i + 1)); });
