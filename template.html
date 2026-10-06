@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FORE</title>
-<meta name="description" content="FORE: a golf card game. Draw a format card for the hole, hold keeps cards for later.">
+<meta name="description" content="FORE: a golf card game. Draw a format card for the hole, hold power ups for later.">
 <meta name="theme-color" content="#14512b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -55,7 +55,7 @@
   #update button { background: var(--ink); color: var(--cream); padding: 8px 14px; border-radius: 999px; font-weight: 700; }
 
   header {
-    padding: calc(12px + var(--safe-top)) 16px 8px;
+    padding: calc(12px + var(--safe-top)) 16px 4px;
     display: flex; align-items: center; justify-content: space-between;
   }
   header h1 {
@@ -72,19 +72,18 @@
   #install.show { display: inline-block; }
 
   main {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    padding: 8px 16px;
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 4px 16px; gap: 12px; min-height: 0;
   }
   .card {
-    width: min(100%, 360px);
+    width: min(100%, 360px, calc(58vh * 5 / 7));
     aspect-ratio: 5 / 7;
-    max-height: 70vh;
     background: var(--cream); color: var(--ink);
     border-radius: var(--radius);
     box-shadow: 0 18px 40px rgba(0,0,0,.45), inset 0 0 0 6px var(--cream), inset 0 0 0 8px rgba(0,0,0,.08);
     padding: 26px 24px;
     display: flex; flex-direction: column;
-    position: relative;
+    position: relative; overflow: hidden;
     transform-origin: 50% 60%;
   }
   .card.empty { align-items: center; justify-content: center; text-align: center; color: var(--muted); font-size: 18px; }
@@ -98,7 +97,8 @@
   }
   .card.format .pile { color: var(--format); }
   .card.keeps .pile { color: var(--keeps); }
-  .card h2 { margin: 10px 0 14px; font-size: 32px; line-height: 1.05; padding-right: 56px; }
+  .card h2 { margin: 10px 0 14px; font-size: 32px; line-height: 1.05; }
+  .card.format h2 { padding-right: 56px; }
   .card .body { font-size: 18px; line-height: 1.4; overflow: auto; }
   .card.long .body { font-size: 15px; line-height: 1.35; }
   .card.long h2 { font-size: 26px; }
@@ -118,13 +118,50 @@
   }
   .card .points small { font-size: 9px; letter-spacing: .1em; font-weight: 700; }
   .card .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
-
-  footer {
-    padding: 8px 16px calc(16px + var(--safe-bottom));
+  .card.played::after {
+    content: 'PLAYED';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) rotate(-18deg);
+    padding: 8px 22px; border: 5px solid var(--format); border-radius: 10px;
+    color: var(--format); font-size: 44px; font-weight: 900; letter-spacing: .12em;
+    opacity: .82; pointer-events: none;
+    animation: stamp .25s cubic-bezier(.2,.9,.3,1.3);
   }
+  @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
+
+  .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 48px; }
+  .actions:empty { display: none; }
+  .act {
+    flex: 1; padding: 13px 12px; border-radius: 14px; font-weight: 800; font-size: 17px;
+    background: rgba(255,255,255,.14); color: var(--cream);
+  }
+  .act.primary { background: var(--gold); color: var(--ink); }
+  .act.danger { background: var(--format); color: #fff; }
+  .act:active { filter: brightness(.9); }
+
+  .hand { padding: 6px 0 2px; }
+  .hand.empty { display: none; }
+  .hand .title {
+    padding: 0 16px 6px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; opacity: .7;
+  }
+  .hand .strip {
+    display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 8px;
+    scrollbar-width: none;
+  }
+  .hand .strip::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; background: var(--keeps); color: #fff;
+    padding: 9px 13px; border-radius: 12px; font-weight: 700; font-size: 13px;
+    box-shadow: 0 3px 0 rgba(0,0,0,.3); max-width: 60vw;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chip.on { outline: 3px solid var(--gold); outline-offset: 1px; }
+
+  footer { padding: 4px 16px calc(14px + var(--safe-bottom)); }
   .piles { display: flex; gap: 12px; }
   .draw {
-    flex: 1; padding: 18px 12px; border-radius: var(--radius);
+    flex: 1; padding: 16px 12px; border-radius: var(--radius);
     color: #fff; font-weight: 800; font-size: 20px; letter-spacing: .02em;
     box-shadow: 0 6px 0 rgba(0,0,0,.3);
     display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -133,9 +170,7 @@
   .draw small { font-size: 12px; font-weight: 600; opacity: .85; }
   .draw.format { background: var(--format); }
   .draw.keeps { background: var(--keeps); }
-  .status {
-    margin-top: 12px; text-align: center; font-size: 12px; opacity: .6;
-  }
+  .status { margin-top: 10px; text-align: center; font-size: 12px; opacity: .6; }
 </style>
 </head>
 <body>
@@ -149,13 +184,19 @@
   <h1>FORE</h1>
   <div class="tools">
     <button id="install" class="tool" type="button">Install</button>
-    <button id="shuffle" class="tool" type="button">Shuffle</button>
+    <button id="shuffle" class="tool" type="button">New Round</button>
   </div>
 </header>
 
 <main>
-  <div id="card" class="card empty">Tap a pile to draw.</div>
+  <div id="card" class="card empty">Draw a Format card to start the hole.</div>
+  <div id="actions" class="actions"></div>
 </main>
+
+<div id="hand" class="hand empty">
+  <div class="title">Your hand · <span id="hand-count"></span></div>
+  <div id="strip" class="strip"></div>
+</div>
 
 <footer>
   <div class="piles">
@@ -173,7 +214,7 @@
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
-  var STORE_KEY = 'fore.deck.v1';
+  var STORE_KEY = 'fore.deck.v2';
   var PILES = ['format', 'keeps'];
 
   var sounds = {
@@ -186,6 +227,12 @@
     try { s.currentTime = 0; var p = s.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
   }
 
+  // State:
+  //   format, keeps : draw piles (card ids, top of pile is the end)
+  //   hole          : format card id in play for this hole, or null
+  //   hand          : power up card ids you are holding
+  //   view          : what the big card shows
+  //                   { type: 'hole' } | { type: 'hand', i: index, played: bool }
   function shuffledPile(pile) {
     var ids = [];
     CARDS.forEach(function (c) {
@@ -199,17 +246,18 @@
     return ids;
   }
   function freshState() {
-    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), current: null };
+    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), hole: null, hand: [], view: { type: 'hole' } };
+  }
+  function validIds(list, pile) {
+    return Array.isArray(list) && list.every(function (id) { return BY_ID[id] && BY_ID[id].pile === pile; });
   }
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(STORE_KEY));
       if (!s) return null;
-      var ok = PILES.every(function (p) {
-        return Array.isArray(s[p]) && s[p].every(function (id) { return BY_ID[id] && BY_ID[id].pile === p; });
-      });
-      if (!ok) return null;
-      if (s.current && !BY_ID[s.current.id]) s.current = null;
+      if (!validIds(s.format, 'format') || !validIds(s.keeps, 'keeps') || !validIds(s.hand, 'keeps')) return null;
+      if (s.hole && !(BY_ID[s.hole] && BY_ID[s.hole].pile === 'format')) s.hole = null;
+      if (!s.view || (s.view.type === 'hand' && !(s.view.i >= 0 && s.view.i < s.hand.length))) s.view = { type: 'hole' };
       return s;
     } catch (e) { return null; }
   }
@@ -219,23 +267,15 @@
   var state = load() || freshState();
 
   var cardEl = document.getElementById('card');
+  var actionsEl = document.getElementById('actions');
+  var handEl = document.getElementById('hand');
+  var stripEl = document.getElementById('strip');
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (ch) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
     });
   }
-  function render(animate) {
-    PILES.forEach(function (p) {
-      document.getElementById('count-' + p).textContent = state[p].length + ' left';
-    });
-    var cur = state.current;
-    cardEl.classList.remove('deal');
-    if (!cur) {
-      cardEl.className = 'card empty';
-      cardEl.textContent = 'Tap a pile to draw.';
-      return;
-    }
-    var c = BY_ID[cur.id];
+  function cardHtml(c) {
     var chars = 0;
     var body = '';
     c.body.forEach(function (b) {
@@ -249,32 +289,118 @@
         chars += b.text.length;
       }
     });
-    cardEl.className = 'card ' + c.pile + (chars > 220 ? ' long' : '');
-    var html = '<div class="pile">' + (c.pile === 'format' ? 'Format · this hole' : 'Power Up · hold it') + '</div>';
+    var html = '<div class="pile">' + (c.pile === 'format' ? 'Format · this hole' : 'Power Up') + '</div>';
     if (c.points != null) html += '<div class="points">' + c.points + '<small>PTS</small></div>';
     html += '<h2>' + esc(c.title) + '</h2><div class="body">' + body + '</div>';
-    html += '<div class="foot">' + (c.pile === 'format' ? 'Expires at the end of this hole.' : 'One use. Yours until you spend it.') + '</div>';
-    cardEl.innerHTML = html;
+    html += '<div class="foot">' + (c.pile === 'format' ? 'Expires at the end of this hole.' : 'One use. Play it when you want it.') + '</div>';
+    return { html: html, long: chars > 220 };
+  }
+  function button(cls, label, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'act ' + cls;
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+  function render(animate) {
+    PILES.forEach(function (p) {
+      document.getElementById('count-' + p).textContent = state[p].length + ' left';
+    });
+
+    // Hand strip
+    handEl.classList.toggle('empty', state.hand.length === 0);
+    document.getElementById('hand-count').textContent = state.hand.length + (state.hand.length === 1 ? ' card' : ' cards');
+    stripEl.innerHTML = '';
+    state.hand.forEach(function (id, i) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip' + (state.view.type === 'hand' && state.view.i === i ? ' on' : '');
+      chip.textContent = BY_ID[id].title;
+      chip.addEventListener('click', function () { showHand(i); });
+      stripEl.appendChild(chip);
+    });
+
+    // Big card and its action buttons
+    actionsEl.innerHTML = '';
+    cardEl.classList.remove('deal');
+    var c = null, cls = '';
+    if (state.view.type === 'hand') {
+      c = BY_ID[state.hand[state.view.i]];
+      if (state.view.played) {
+        cls = ' played';
+        actionsEl.appendChild(button('danger', 'Discard', discardPlayed));
+      } else {
+        actionsEl.appendChild(button('', 'Back', showHole));
+        actionsEl.appendChild(button('primary', 'Play', playCard));
+      }
+    } else if (state.hole) {
+      c = BY_ID[state.hole];
+    }
+    if (!c) {
+      cardEl.className = 'card empty';
+      cardEl.textContent = 'Draw a Format card to start the hole.';
+    } else {
+      var r = cardHtml(c);
+      cardEl.className = 'card ' + c.pile + (r.long ? ' long' : '') + cls;
+      cardEl.innerHTML = r.html;
+    }
     if (animate) {
       void cardEl.offsetWidth;
       cardEl.classList.add('deal');
     }
+    var on = stripEl.querySelector('.chip.on');
+    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
   }
-  function draw(pile) {
-    if (!state[pile].length) state[pile] = shuffledPile(pile);
+
+  function drawFormat() {
+    if (!state.format.length) state.format = shuffledPile('format');
+    state.hole = state.format.pop();
+    state.view = { type: 'hole' };
     play('draw');
-    state.current = { pile: pile, id: state[pile].pop() };
     save();
     render(true);
   }
-  function shuffleAll() {
-    state = freshState();
+  function drawPowerUp() {
+    if (!state.keeps.length) state.keeps = shuffledPile('keeps');
+    state.hand.push(state.keeps.pop());
+    state.view = { type: 'hand', i: state.hand.length - 1, played: false };
+    play('draw');
+    save();
+    render(true);
+  }
+  function showHand(i) {
+    state.view = { type: 'hand', i: i, played: false };
+    save();
+    render(true);
+  }
+  function showHole() {
+    state.view = { type: 'hole' };
     save();
     render(false);
   }
-  document.getElementById('draw-format').addEventListener('click', function () { draw('format'); });
-  document.getElementById('draw-keeps').addEventListener('click', function () { draw('keeps'); });
-  document.getElementById('shuffle').addEventListener('click', shuffleAll);
+  function playCard() {
+    if (state.view.type !== 'hand') return;
+    state.view.played = true;
+    save();
+    render(false);
+  }
+  function discardPlayed() {
+    if (state.view.type !== 'hand' || !state.view.played) return;
+    state.hand.splice(state.view.i, 1);
+    state.view = { type: 'hole' };
+    save();
+    render(true);
+  }
+  function newRound() {
+    if (state.hand.length && !confirm('Start a new round? This clears your hand and reshuffles both piles.')) return;
+    state = freshState();
+    save();
+    render(true);
+  }
+  document.getElementById('draw-format').addEventListener('click', drawFormat);
+  document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
+  document.getElementById('shuffle').addEventListener('click', newRound);
   document.getElementById('version').textContent = 'v' + VERSION;
   render(false);
 
