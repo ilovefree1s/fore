@@ -365,7 +365,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.22';
+  var VERSION = '0.1.23';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -650,7 +650,7 @@
       var v = s.scores[h][i];
       var lead = best > 0 && totals[i] === best;
       html += '<div class="player' + (lead ? ' lead' : '') + '">' +
-        '<div class="grow" data-act="rename" data-i="' + i + '">' +
+        '<div class="grow">' +
         '<div class="name">' + esc(name) + '</div>' +
         '<div class="sub">' + (lead ? '<span class="lead-tag">LEAD</span>' : '') +
         '<span>' + totals[i] + ' total</span></div></div>' +
@@ -660,7 +660,7 @@
         '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
         '</div></div>';
     });
-    html += '<div class="hint">Tap a name to rename. Points are per hole, totals run under each name.</div>' +
+    html += '<div class="hint">Points are per hole. Totals run under each name.</div>' +
       '<div class="holestrip" id="holestrip">';
     for (var hc = 0; hc < HOLES; hc++) {
       var t = holeTotal(hc);
@@ -683,12 +683,6 @@
       score.hole = n;
     } else if (act === 'pt') {
       score.scores[score.hole][i] += n;
-    } else if (act === 'rename') {
-      var name = prompt('Player name', score.players[i]);
-      if (name == null) return;
-      name = name.trim();
-      if (!name) return;
-      score.players[i] = name;
     }
     saveScore();
     renderScore();
