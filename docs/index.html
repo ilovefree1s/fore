@@ -274,12 +274,6 @@
   .steps .step { width: 40px; height: 40px; font-size: 22px; }
   .steps .step.plus { background: var(--format); }
   .steps .step.minus { background: rgba(255,255,255,.14); }
-  .scoretools { display: flex; gap: 8px; margin: 4px 0 10px; }
-  .scoretools button {
-    flex: 1; padding: 10px; border-radius: 12px; background: rgba(255,255,255,.12); color: var(--cream);
-    font-weight: 700; font-size: 14px;
-  }
-  .scoretools button.on { background: var(--cream); color: var(--felt-deep); }
   .holestrip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
   .holestrip::-webkit-scrollbar { display: none; }
   .holechip {
@@ -371,7 +365,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.21';
+  var VERSION = '0.1.22';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -642,10 +636,6 @@
   function holeTotal(h) {
     return score.scores[h].reduce(function (a, b) { return a + b; }, 0);
   }
-  function anyPoints() {
-    for (var h = 0; h < HOLES; h++) if (holeTotal(h) !== 0) return true;
-    return false;
-  }
   function renderScore() {
     var s = score, h = s.hole;
     var totals = s.players.map(function (_, i) { return totalFor(i); });
@@ -670,10 +660,7 @@
         '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
         '</div></div>';
     });
-    html += '<div class="scoretools">' +
-      '<button data-act="clear">Clear scores</button>' +
-      '</div>' +
-      '<div class="hint">Tap a name to rename. Points are per hole, totals run under each name.</div>' +
+    html += '<div class="hint">Tap a name to rename. Points are per hole, totals run under each name.</div>' +
       '<div class="holestrip" id="holestrip">';
     for (var hc = 0; hc < HOLES; hc++) {
       var t = holeTotal(hc);
@@ -702,10 +689,6 @@
       name = name.trim();
       if (!name) return;
       score.players[i] = name;
-    } else if (act === 'clear') {
-      if (anyPoints() && !confirm('Clear every score? Names stay.')) return;
-      score.scores = emptyScores(PLAYERS);
-      score.hole = 0;
     }
     saveScore();
     renderScore();
