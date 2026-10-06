@@ -45,23 +45,32 @@ function parseCards(md) {
       flush();
       card = null;
       const h = m[1].toLowerCase();
-      pile = /format/.test(h) ? 'format' : /keep|power/.test(h) ? 'keeps' : null;
+      pile = /fore-?mat|format/.test(h) ? 'format' : /keep|power/.test(h) ? 'keeps' : null;
       return;
     }
     if ((m = /^##\s+(.+)$/.exec(line))) {
       flush();
-      if (!pile) fail(`cards.md:${ln}: card "${m[1]}" is not under a Format or Power Up pile heading`);
+      if (!pile) fail(`cards.md:${ln}: card "${m[1]}" is not under a Fore-Mat or Power Up pile heading`);
       const title = m[1].trim();
       const id = pile + ':' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       if (cards.some((c) => c.id === id)) fail(`cards.md:${ln}: duplicate card "${title}" in ${pile} pile`);
-      card = { id, pile, title, points: null, count: 1, body: [] };
+      card = { id, pile, title, points: null, format: null, count: 1, body: [] };
       cards.push(card);
       return;
     }
     if (!card) return; // prose before the first pile, or under a pile heading
-    if ((m = /^(points|count):\s*(\d+)\s*$/i.exec(line))) {
+    if ((m = /^(points|count|format):\s*(.+?)\s*$/i.exec(line))) {
       flush();
-      card[m[1].toLowerCase()] = Number(m[2]);
+      const key = m[1].toLowerCase();
+      if (key === 'count') {
+        if (!/^\d+$/.test(m[2])) fail(`cards.md:${ln}: count must be a whole number`);
+        card.count = Number(m[2]);
+      } else if (key === 'points') {
+        if (m[2].length > 5) fail(`cards.md:${ln}: points "${m[2]}" is too long for the badge (5 chars max)`);
+        card.points = m[2];
+      } else {
+        card.format = m[2];
+      }
       return;
     }
     if (line.trim() === '') { flush(); return; }
@@ -85,8 +94,8 @@ function parseCards(md) {
   flush();
 
   cards.forEach((c) => {
-    if (c.pile === 'format' && c.points == null) fail(`cards.md: format card "${c.title}" has no "points:" line`);
-    if (c.pile === 'keeps' && c.points != null) fail(`cards.md: keeps card "${c.title}" should not have points`);
+    if (c.pile === 'format' && c.points == null) fail(`cards.md: Fore-Mat card "${c.title}" has no "points:" line`);
+    if (c.pile === 'keeps' && (c.points != null || c.format != null)) fail(`cards.md: Power Up "${c.title}" should not have points or format`);
     if (!c.body.length) fail(`cards.md: card "${c.title}" has no body text`);
     if (c.count < 1) fail(`cards.md: card "${c.title}" has count 0`);
   });
@@ -240,5 +249,5 @@ write('.nojekyll', '');
 
 fs.writeFileSync(versionFile, VERSION + '\n');
 const byPile = (p) => cards.filter((c) => c.pile === p).reduce((n, c) => n + c.count, 0);
-console.log(`cards: ${byPile('format')} format, ${byPile('keeps')} power ups (${cards.length} distinct)`);
+console.log(`cards: ${byPile('format')} fore-mats, ${byPile('keeps')} power ups (${cards.length} distinct)`);
 console.log(`done: docs/ is v${VERSION}`);

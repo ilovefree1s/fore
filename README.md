@@ -3,7 +3,7 @@
 A golf card game for the course. One phone, no accounts, no network. Draw a
 card, show the group. Modeled on the FORE! Cards deck, for regular ball golf.
 
-- **Format cards** change the hole for everyone, then expire. Each is worth points.
+- **Fore-Mat cards** set the format for the whole hole, then expire. Each is worth points.
 - **Power Up cards** go into your hand when drawn. Tap one, hit Play to show the group, then Discard.
 
 ## Layout

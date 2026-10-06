@@ -116,7 +116,16 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     font-weight: 800; font-size: 22px; line-height: 1;
   }
+  .card .points.wide { font-size: 17px; }
   .card .points small { font-size: 9px; letter-spacing: .1em; font-weight: 700; }
+  .card .format {
+    display: inline-block; margin: -6px 0 12px; padding: 3px 9px; border-radius: 6px;
+    background: rgba(200,84,31,.12); color: var(--format);
+    font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .card.xlong .body { font-size: 13.5px; line-height: 1.3; }
+  .card.xlong .body p, .card.xlong .body ul { margin-bottom: 8px; }
+  .card.xlong h2 { font-size: 22px; margin-bottom: 10px; }
   .card .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
   .card.played::after {
     content: 'PLAYED';
@@ -195,7 +204,7 @@
 </header>
 
 <main>
-  <div id="card" class="card empty">Draw a Format card to start the hole.</div>
+  <div id="card" class="card empty">Draw a Fore-Mat card to start the hole.</div>
   <div id="actions" class="actions"></div>
 </main>
 
@@ -206,7 +215,7 @@
 
 <footer>
   <div class="piles">
-    <button id="draw-format" class="draw format" type="button">Format<small id="count-format"></small></button>
+    <button id="draw-format" class="draw format" type="button">Fore-Mat<small id="count-format"></small></button>
     <button id="draw-keeps" class="draw keeps" type="button">Power Up<small id="count-keeps"></small></button>
   </div>
   <div class="status"><span id="version"></span> · <span id="offline">checking offline support</span></div>
@@ -299,11 +308,15 @@
         chars += b.text.length;
       }
     });
-    var html = '<div class="pile">' + (c.pile === 'format' ? 'Format · this hole' : 'Power Up') + '</div>';
-    if (c.points != null) html += '<div class="points">' + c.points + '<small>PTS</small></div>';
-    html += '<h2>' + esc(c.title) + '</h2><div class="body">' + body + '</div>';
+    var html = '<div class="pile">' + (c.pile === 'format' ? 'Fore-Mat · this hole' : 'Power Up') + '</div>';
+    if (c.points != null) {
+      html += '<div class="points' + (String(c.points).length > 2 ? ' wide' : '') + '">' + esc(c.points) + '<small>PTS</small></div>';
+    }
+    html += '<h2>' + esc(c.title) + '</h2>';
+    if (c.format) html += '<div class="format">' + esc(c.format) + '</div>';
+    html += '<div class="body">' + body + '</div>';
     html += '<div class="foot">' + (c.pile === 'format' ? 'Expires at the end of this hole.' : 'One use. Play it when you want it.') + '</div>';
-    return { html: html, long: chars > 220 };
+    return { html: html, long: chars > 220, xlong: chars > 420 };
   }
   function button(cls, label, onClick) {
     var b = document.createElement('button');
@@ -350,10 +363,10 @@
     }
     if (!c) {
       cardEl.className = 'card empty';
-      cardEl.textContent = 'Draw a Format card to start the hole.';
+      cardEl.textContent = 'Draw a Fore-Mat card to start the hole.';
     } else {
       var r = cardHtml(c);
-      cardEl.className = 'card ' + c.pile + (r.long ? ' long' : '') + cls;
+      cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + cls;
       cardEl.innerHTML = r.html;
     }
     if (animate) {
