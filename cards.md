@@ -203,7 +203,7 @@ points: 1
 Every player plays their own ball.
 
 Rules:
-- Every player must use a 7 iron for the entire hole. Putts included.
+- Every player must use a 7 iron for the entire hole.
 
 Scoring:
 - Lowest score earns 1 point.
