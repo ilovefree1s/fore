@@ -21,28 +21,36 @@ const VERSION = parts.join('.');
 
 // ---------- cards.md ----------
 function parseCards(md) {
+  // Body is a list of blocks: { type: 'p', text } or { type: 'list', label, items }.
   const cards = [];
   let pile = null;
   let card = null;
-  let para = [];
+  let para = [];   // lines of the paragraph being collected
+  let list = null; // list being collected, or null
   const flushPara = () => {
-    if (card && para.length) card.body.push(para.join(' '));
+    if (card && para.length) card.body.push({ type: 'p', text: para.join(' ') });
     para = [];
   };
+  const flushList = () => {
+    if (card && list && list.items.length) card.body.push(list);
+    else if (card && list && list.label) card.body.push({ type: 'p', text: list.label + ':' });
+    list = null;
+  };
+  const flush = () => { flushPara(); flushList(); };
   md.split(/\r?\n/).forEach((raw, i) => {
     const line = raw.trimEnd();
     const ln = i + 1;
     let m;
     if ((m = /^#\s+(.+)$/.exec(line))) {
-      flushPara();
+      flush();
       card = null;
       const h = m[1].toLowerCase();
-      pile = /format/.test(h) ? 'format' : /keep/.test(h) ? 'keeps' : null;
+      pile = /format/.test(h) ? 'format' : /keep|power/.test(h) ? 'keeps' : null;
       return;
     }
     if ((m = /^##\s+(.+)$/.exec(line))) {
-      flushPara();
-      if (!pile) fail(`cards.md:${ln}: card "${m[1]}" is not under a Format or Keeps pile heading`);
+      flush();
+      if (!pile) fail(`cards.md:${ln}: card "${m[1]}" is not under a Format or Power Up pile heading`);
       const title = m[1].trim();
       const id = pile + ':' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       if (cards.some((c) => c.id === id)) fail(`cards.md:${ln}: duplicate card "${title}" in ${pile} pile`);
@@ -52,14 +60,29 @@ function parseCards(md) {
     }
     if (!card) return; // prose before the first pile, or under a pile heading
     if ((m = /^(points|count):\s*(\d+)\s*$/i.exec(line))) {
-      flushPara();
+      flush();
       card[m[1].toLowerCase()] = Number(m[2]);
       return;
     }
-    if (line.trim() === '') { flushPara(); return; }
+    if (line.trim() === '') { flush(); return; }
+    if ((m = /^([A-Za-z][^:]{0,40}):$/.exec(line.trim()))) { // "Restrictions:" starts a labeled list
+      flush();
+      list = { type: 'list', label: m[1].trim(), items: [] };
+      return;
+    }
+    if ((m = /^-\s+(.+)$/.exec(line.trim()))) {
+      flushPara();
+      if (!list) list = { type: 'list', label: null, items: [] };
+      list.items.push(m[1].trim());
+      return;
+    }
+    if (list && list.items.length) { // continuation of a wrapped bullet
+      list.items[list.items.length - 1] += ' ' + line.trim();
+      return;
+    }
     para.push(line.trim());
   });
-  flushPara();
+  flush();
 
   cards.forEach((c) => {
     if (c.pile === 'format' && c.points == null) fail(`cards.md: format card "${c.title}" has no "points:" line`);
@@ -217,5 +240,5 @@ write('.nojekyll', '');
 
 fs.writeFileSync(versionFile, VERSION + '\n');
 const byPile = (p) => cards.filter((c) => c.pile === p).reduce((n, c) => n + c.count, 0);
-console.log(`cards: ${byPile('format')} format, ${byPile('keeps')} keeps (${cards.length} distinct)`);
+console.log(`cards: ${byPile('format')} format, ${byPile('keeps')} power ups (${cards.length} distinct)`);
 console.log(`done: docs/ is v${VERSION}`);
