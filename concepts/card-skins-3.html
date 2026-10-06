@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FORE card skins, round 3</title>
+<style>
+  body { margin: 0; background: #161616; color: #eee; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .lead { opacity: .7; margin: 0 0 28px; font-size: 14px; max-width: 700px; line-height: 1.5; }
+  section { margin-bottom: 44px; }
+  section h2 { font-size: 16px; margin: 0 0 2px; }
+  section h2 span { opacity: .5; font-weight: 500; margin-left: 10px; font-size: 13px; }
+  section p { font-size: 13px; opacity: .7; margin: 0 0 14px; max-width: 640px; line-height: 1.5; }
+  .row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+
+  .card {
+    --accent: #c8541f; --accent-dark: #8f3a13; --accent-light: #ffb48a;
+    width: 300px; height: 420px; border-radius: 18px; position: relative; overflow: hidden;
+    box-sizing: border-box; padding: 26px 22px 20px; display: flex; flex-direction: column;
+    color: #1c1b17; box-shadow: 0 16px 36px rgba(0,0,0,.5); background: #fff;
+  }
+  .card * { box-sizing: border-box; }
+  .card.keeps { --accent: #2a5fb3; --accent-dark: #1d4382; --accent-light: #9ec5ff; }
+  .pile { font-size: 11px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+  .card h3 { margin: 6px 0 10px; font-size: 28px; line-height: 1.05; }
+  .fmt { display: inline-block; align-self: flex-start; margin: 0 0 10px; padding: 3px 9px; border-radius: 6px; background: rgba(0,0,0,.08); color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .body { font-size: 13px; line-height: 1.38; overflow: hidden; }
+  .body p { margin: 0 0 8px; }
+  .label { font-size: 9.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; opacity: .65; margin: 4px 0 2px; }
+  .body ul { margin: 0 0 8px; padding-left: 16px; }
+  .body li { margin-bottom: 3px; }
+  .points { position: absolute; top: 20px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; line-height: 1; }
+  .points small { font-size: 8px; letter-spacing: .12em; }
+  .foot { margin-top: auto; font-size: 10.5px; opacity: .6; position: relative; }
+
+  /* ===== 1. Sportswear, white ===== */
+  .s-sport { background: #fff; padding-top: 22px; }
+  .s-sport::before { content: ''; position: absolute; left: -40px; top: 92px; width: 400px; height: 54px; background: var(--accent); transform: rotate(-7deg); }
+  .s-sport::after { content: ''; position: absolute; left: -40px; top: 150px; width: 400px; height: 5px; background: #111; transform: rotate(-7deg); }
+  .s-sport .pile { color: #111; }
+  .s-sport h3 { font-size: 46px; font-style: italic; font-weight: 900; letter-spacing: -.02em; text-transform: uppercase; margin: 16px 0 26px -2px; line-height: .95; position: relative; z-index: 1; color: #111; text-shadow: 3px 3px 0 #fff; }
+  .s-sport .fmt { background: #111; color: #fff; position: relative; z-index: 1; border-radius: 0; margin-bottom: 22px; }
+  .s-sport .body { position: relative; z-index: 1; }
+  .s-sport .label { color: var(--accent); opacity: 1; }
+  .s-sport .points { top: 16px; right: 16px; width: 60px; height: 60px; border-radius: 0; background: transparent; color: var(--accent); font-size: 40px; font-style: italic; font-weight: 900; letter-spacing: -.04em; }
+  .s-sport .points small { display: none; }
+
+  /* ===== 2. Golf Ball ===== */
+  .s-ball { background: #fff; padding-top: 30px;
+    background-image: radial-gradient(circle, rgba(0,0,0,.09) 3.5px, transparent 4px), radial-gradient(circle, rgba(0,0,0,.09) 3.5px, transparent 4px);
+    background-size: 22px 22px; background-position: 0 0, 11px 11px; }
+  .s-ball::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: var(--accent); }
+  .s-ball::after { content: ''; position: absolute; left: 50%; top: 14px; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); opacity: .15; }
+  .s-ball .pile { color: var(--accent); background: #fff; align-self: flex-start; padding: 2px 6px 2px 0; }
+  .s-ball h3 { background: #fff; align-self: flex-start; padding: 2px 8px 2px 0; font-size: 32px; font-weight: 900; }
+  .s-ball .fmt { background: var(--accent); color: #fff; }
+  .s-ball .body { background: rgba(255,255,255,.92); padding: 8px 10px; border-radius: 10px; margin: 0 -8px; }
+  .s-ball .points { top: 26px; box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--accent); }
+  .s-ball .foot { background: #fff; align-self: flex-start; padding: 2px 6px 2px 0; }
+
+  /* ===== 3. Argyle ===== */
+  .s-argyle { background: #f8f4ea; padding: 0; }
+  .s-argyle .top { height: 118px; position: relative; padding: 18px 22px;
+    background-color: var(--accent);
+    background-image:
+      linear-gradient(45deg, rgba(0,0,0,.18) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.18) 75%),
+      linear-gradient(-45deg, rgba(0,0,0,.18) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.18) 75%),
+      repeating-linear-gradient(45deg, transparent 0 19px, rgba(255,255,255,.35) 19px 20px),
+      repeating-linear-gradient(-45deg, transparent 0 19px, rgba(255,255,255,.35) 19px 20px);
+    background-size: 40px 40px, 40px 40px, 40px 40px, 40px 40px; }
+  .s-argyle .top .pile { color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  .s-argyle .top h3 { color: #fff; margin: 8px 0 0; font-size: 30px; text-shadow: 0 2px 0 rgba(0,0,0,.3); padding-right: 60px; }
+  .s-argyle .top .points { top: 16px; right: 16px; background: #f8f4ea; color: var(--accent); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .s-argyle .crest { position: absolute; left: 22px; bottom: -16px; width: 34px; height: 40px; background: #f8f4ea; border: 3px solid var(--accent); border-radius: 4px 4px 17px 17px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--accent); z-index: 2; }
+  .s-argyle .fmt { margin: 28px 22px 8px; background: var(--accent); color: #fff; }
+  .s-argyle .body { padding: 0 22px; }
+  .s-argyle .foot { padding: 0 22px 16px; }
+  .s-argyle .label { color: var(--accent); opacity: 1; }
+
+  /* ===== 4. Frosted Glass ===== */
+  .s-glass { background: #fff; padding: 0; }
+  .s-glass .blobs { position: absolute; inset: 0; background: linear-gradient(135deg, var(--accent-light), #fff 60%); }
+  .s-glass .blobs i { position: absolute; border-radius: 50%; filter: blur(28px); opacity: .85; display: block; }
+  .s-glass .blobs i:nth-child(1) { width: 200px; height: 200px; left: -60px; top: -40px; background: var(--accent); }
+  .s-glass .blobs i:nth-child(2) { width: 160px; height: 160px; right: -50px; top: 60px; background: #ffd166; }
+  .s-glass .blobs i:nth-child(3) { width: 180px; height: 180px; left: 40px; bottom: -80px; background: #06d6a0; }
+  .s-glass.keeps .blobs i:nth-child(2) { background: #8ecae6; } .s-glass.keeps .blobs i:nth-child(3) { background: #c77dff; }
+  .s-glass .pane { position: absolute; inset: 56px 14px 14px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.9); border-radius: 16px; padding: 18px 18px 14px; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+  .s-glass .pile { position: absolute; top: 22px; left: 22px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .s-glass .points { top: 10px; right: 14px; background: rgba(255,255,255,.9); color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+  .s-glass .pane h3 { margin: 0 0 8px; }
+  .s-glass .fmt { background: var(--accent); color: #fff; border-radius: 999px; }
+  .s-glass .body { font-size: 12.5px; }
+
+  /* ===== 5. Pin Flag ===== */
+  .s-flag { background: #eaf3e6; padding: 22px 22px 20px 44px; }
+  .s-flag::before { content: ''; position: absolute; left: 22px; top: 0; bottom: 0; width: 7px; background: linear-gradient(90deg, #d9d9d9, #8c8c8c 50%, #5c5c5c); }
+  .s-flag::after { content: ''; position: absolute; left: 18px; top: -6px; width: 15px; height: 15px; border-radius: 50%; background: #e0b94a; box-shadow: 0 2px 2px rgba(0,0,0,.2); }
+  .s-flag .flag { position: absolute; left: 29px; top: 18px; right: 0; height: 118px; background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 7% 50%); padding: 18px 22px 18px 44px; color: #fff;
+    background-image: linear-gradient(180deg, rgba(255,255,255,.12), transparent 50%, rgba(0,0,0,.12)); }
+  .s-flag .flag .pile { color: rgba(255,255,255,.9); padding-right: 60px; }
+  .s-flag .flag h3 { margin: 8px 0 0; color: #fff; font-size: 30px; padding-right: 56px; }
+  .s-flag .flag .points { top: 14px; right: 16px; background: #fff; color: var(--accent); }
+  .s-flag .fmt { margin: 128px 0 10px; background: #1c1b17; color: #fff; }
+  .s-flag .label { color: var(--accent); opacity: 1; }
+  .s-flag .cup { position: absolute; left: 10px; bottom: 10px; width: 32px; height: 10px; border-radius: 50%; background: #2f5d3a; }
+</style>
+</head>
+<body>
+<h1>FORE card skins, round 3</h1>
+<p class="lead">Sportswear redone in white, plus four new directions. Same content on every card. All built-in fonts, so any of them works offline as-is.</p>
+
+<section>
+  <h2>1. Sportswear, white <span>white card, orange or blue slash, thin black strip</span></h2>
+  <p>Same energy as before but on white. The pile color slash cuts behind the big italic title with a thin black strip under it. Points as a bare number in the pile color.</p>
+  <div class="row">
+    <div class="card s-sport format"><div class="pile">Fore-Mat · this hole</div><div class="points">1-3</div><h3>Wolf!</h3><div class="fmt">1v3 or 2v2</div>
+      <div class="body"><p>Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</p><div class="label">Lone Wolf</div><ul><li>Beat or tie the best of the other three: Wolf earns 3 points. Lose: each of them earns 1.</li></ul><div class="label">Choose a Partner</div><ul><li>Lowest combined team score earns 1 point.</li></ul></div><div class="foot">Expires at the end of this hole.</div></div>
+    <div class="card s-sport keeps"><div class="pile">Power Up</div><h3>Air Horn!</h3><div class="fmt">One use</div><div class="body"><p>Distract another player during their swing.</p></div><div class="foot">Play it when you want it.</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>2. Golf Ball <span>dimple pattern, alignment stripe</span></h2>
+  <p>The card is a golf ball. White with a dimple pattern all over, a solid pile-color stripe along the top like an alignment line, and the text sitting on clean white panels so it stays readable over the dimples.</p>
+  <div class="row">
+    <div class="card s-ball format"><div class="pile">Fore-Mat · this hole</div><div class="points">1-3<small>PTS</small></div><h3>Wolf!</h3><div class="fmt">1v3 or 2v2</div>
+      <div class="body"><p>Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</p><div class="label">Lone Wolf</div><ul><li>Beat or tie the best of the other three: Wolf earns 3 points. Lose: each of them earns 1.</li></ul><div class="label">Choose a Partner</div><ul><li>Lowest combined team score earns 1 point.</li></ul></div><div class="foot">Expires at the end of this hole.</div></div>
+    <div class="card s-ball keeps"><div class="pile">Power Up</div><h3>Air Horn!</h3><div class="fmt">One use</div><div class="body"><p>Distract another player during their swing.</p></div><div class="foot">Play it when you want it.</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>3. Argyle <span>sweater-vest diamonds, club crest</span></h2>
+  <p>The golf sweater. An argyle diamond header in the pile color with the title on it, a little crest badge hanging off the bottom of the header like a club patch, cream body below. Orange argyle for Fore-Mats, blue for Power Ups.</p>
+  <div class="row">
+    <div class="card s-argyle format"><div class="top"><div class="pile">Fore-Mat · this hole</div><div class="points">1-3<small>PTS</small></div><h3>Wolf!</h3><div class="crest">F</div></div><div class="fmt">1v3 or 2v2</div>
+      <div class="body"><p>Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</p><div class="label">Lone Wolf</div><ul><li>Beat or tie the best of the other three: Wolf earns 3 points. Lose: each of them earns 1.</li></ul><div class="label">Choose a Partner</div><ul><li>Lowest combined team score earns 1 point.</li></ul></div><div class="foot">Expires at the end of this hole.</div></div>
+    <div class="card s-argyle keeps"><div class="top"><div class="pile">Power Up</div><h3>Air Horn!</h3><div class="crest">P</div></div><div class="fmt">One use</div><div class="body"><p>Distract another player during their swing.</p></div><div class="foot">Play it when you want it.</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>4. Frosted Glass <span>blurred color blobs behind a frosted panel</span></h2>
+  <p>Modern phone-app look. Soft blurred color blobs fill the card and the rules sit on a frosted glass panel on top. Warm oranges and yellows for Fore-Mats, blues and violet for Power Ups. Looks great on an OLED screen.</p>
+  <div class="row">
+    <div class="card s-glass format"><div class="blobs"><i></i><i></i><i></i></div><div class="pile">Fore-Mat · this hole</div><div class="points">1-3<small>PTS</small></div><div class="pane"><h3>Wolf!</h3><div class="fmt">1v3 or 2v2</div>
+      <div class="body"><p>Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</p><div class="label">Lone Wolf</div><ul><li>Beat or tie the best of the other three: Wolf earns 3 points. Lose: each of them earns 1.</li></ul><div class="label">Choose a Partner</div><ul><li>Lowest combined team score earns 1 point.</li></ul></div><div class="foot">Expires at the end of this hole.</div></div></div>
+    <div class="card s-glass keeps"><div class="blobs"><i></i><i></i><i></i></div><div class="pile">Power Up</div><div class="pane"><h3>Air Horn!</h3><div class="fmt">One use</div><div class="body"><p>Distract another player during their swing.</p></div><div class="foot">Play it when you want it.</div></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>5. Pin Flag <span>flagstick down the left, title on the flag</span></h2>
+  <p>A pin flag. Metal flagstick runs down the left edge with a cup at the bottom and a gold cap on top. The title sits on a notched flag in the pile color, and the rules hang below it on pale green. Orange flag for Fore-Mats, blue for Power Ups.</p>
+  <div class="row">
+    <div class="card s-flag format"><div class="flag"><div class="pile">Fore-Mat · this hole</div><div class="points">1-3<small>PTS</small></div><h3>Wolf!</h3></div><div class="fmt">1v3 or 2v2</div>
+      <div class="body"><p>Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</p><div class="label">Lone Wolf</div><ul><li>Beat or tie the best of the other three: Wolf earns 3 points. Lose: each of them earns 1.</li></ul><div class="label">Choose a Partner</div><ul><li>Lowest combined team score earns 1 point.</li></ul></div><div class="foot">Expires at the end of this hole.</div><div class="cup"></div></div>
+    <div class="card s-flag keeps"><div class="flag"><div class="pile">Power Up</div><h3>Air Horn!</h3></div><div class="fmt">One use</div><div class="body"><p>Distract another player during their swing.</p></div><div class="foot">Play it when you want it.</div><div class="cup"></div></div>
+  </div>
+</section>
+</body>
+</html>
