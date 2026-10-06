@@ -157,6 +157,12 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .chip.on { outline: 3px solid var(--gold); outline-offset: 1px; }
+  .chip.played { background: #6b6b66; text-decoration: line-through; }
+  .chip.played::after {
+    content: 'PLAYED'; margin-left: 8px; font-size: 9px; letter-spacing: .12em;
+    text-decoration: none; color: var(--format); background: #fff; padding: 2px 5px; border-radius: 4px;
+    display: inline-block; vertical-align: 1px;
+  }
 
   footer { padding: 4px 16px calc(14px + var(--safe-bottom)); }
   .piles { display: flex; gap: 12px; }
@@ -210,7 +216,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.6';
+  var VERSION = '0.1.7';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -230,9 +236,10 @@
   // State:
   //   format, keeps : draw piles (card ids, top of pile is the end)
   //   hole          : format card id in play for this hole, or null
-  //   hand          : power up card ids you are holding
+  //   hand          : power up cards you are holding, { id, played }
+  //                   played sticks to the card until it is discarded
   //   view          : what the big card shows
-  //                   { type: 'hole' } | { type: 'hand', i: index, played: bool }
+  //                   { type: 'hole' } | { type: 'hand', i: index }
   function shuffledPile(pile) {
     var ids = [];
     CARDS.forEach(function (c) {
@@ -255,7 +262,10 @@
     try {
       var s = JSON.parse(localStorage.getItem(STORE_KEY));
       if (!s) return null;
-      if (!validIds(s.format, 'format') || !validIds(s.keeps, 'keeps') || !validIds(s.hand, 'keeps')) return null;
+      if (!validIds(s.format, 'format') || !validIds(s.keeps, 'keeps') || !Array.isArray(s.hand)) return null;
+      // Older saves stored the hand as bare ids. Upgrade them to { id, played }.
+      s.hand = s.hand.map(function (h) { return typeof h === 'string' ? { id: h, played: false } : h; });
+      if (!s.hand.every(function (h) { return h && BY_ID[h.id] && BY_ID[h.id].pile === 'keeps'; })) return null;
       if (s.hole && !(BY_ID[s.hole] && BY_ID[s.hole].pile === 'format')) s.hole = null;
       if (!s.view || (s.view.type === 'hand' && !(s.view.i >= 0 && s.view.i < s.hand.length))) s.view = { type: 'hole' };
       return s;
@@ -312,11 +322,11 @@
     handEl.classList.toggle('empty', state.hand.length === 0);
     document.getElementById('hand-count').textContent = state.hand.length + (state.hand.length === 1 ? ' card' : ' cards');
     stripEl.innerHTML = '';
-    state.hand.forEach(function (id, i) {
+    state.hand.forEach(function (h, i) {
       var chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = 'chip' + (state.view.type === 'hand' && state.view.i === i ? ' on' : '');
-      chip.textContent = BY_ID[id].title;
+      chip.className = 'chip' + (state.view.type === 'hand' && state.view.i === i ? ' on' : '') + (h.played ? ' played' : '');
+      chip.textContent = BY_ID[h.id].title;
       chip.addEventListener('click', function () { showHand(i); });
       stripEl.appendChild(chip);
     });
@@ -326,12 +336,13 @@
     cardEl.classList.remove('deal');
     var c = null, cls = '';
     if (state.view.type === 'hand') {
-      c = BY_ID[state.hand[state.view.i]];
-      if (state.view.played) {
+      var h = state.hand[state.view.i];
+      c = BY_ID[h.id];
+      actionsEl.appendChild(button('', 'Back', showHole));
+      if (h.played) {
         cls = ' played';
         actionsEl.appendChild(button('danger', 'Discard', discardPlayed));
       } else {
-        actionsEl.appendChild(button('', 'Back', showHole));
         actionsEl.appendChild(button('primary', 'Play', playCard));
       }
     } else if (state.hole) {
@@ -363,14 +374,14 @@
   }
   function drawPowerUp() {
     if (!state.keeps.length) state.keeps = shuffledPile('keeps');
-    state.hand.push(state.keeps.pop());
-    state.view = { type: 'hand', i: state.hand.length - 1, played: false };
+    state.hand.push({ id: state.keeps.pop(), played: false });
+    state.view = { type: 'hand', i: state.hand.length - 1 };
     play('draw');
     save();
     render(true);
   }
   function showHand(i) {
-    state.view = { type: 'hand', i: i, played: false };
+    state.view = { type: 'hand', i: i };
     save();
     render(true);
   }
@@ -381,12 +392,12 @@
   }
   function playCard() {
     if (state.view.type !== 'hand') return;
-    state.view.played = true;
+    state.hand[state.view.i].played = true;
     save();
     render(false);
   }
   function discardPlayed() {
-    if (state.view.type !== 'hand' || !state.view.played) return;
+    if (state.view.type !== 'hand' || !state.hand[state.view.i].played) return;
     state.hand.splice(state.view.i, 1);
     state.view = { type: 'hole' };
     save();
