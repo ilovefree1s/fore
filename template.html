@@ -295,6 +295,31 @@
   .holechip.done { background: rgba(255,255,255,.22); }
   .holechip.on { background: var(--cream); color: var(--felt-deep); }
   .hint { font-size: 12px; opacity: .65; text-align: center; margin: 6px 0; }
+
+  /* ---- new round setup sheet ---- */
+  .modal {
+    position: fixed; inset: 0; z-index: 20; background: rgba(6,30,16,.92);
+    display: flex; flex-direction: column; padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
+    overflow: auto;
+  }
+  .modal[hidden] { display: none; }
+  .modal h2 { margin: 6px 0 2px; font-size: 24px; letter-spacing: .04em; }
+  .modal .sub { font-size: 13px; opacity: .7; margin: 0 0 14px; }
+  .names { display: flex; flex-direction: column; gap: 8px; }
+  .namerow { display: flex; gap: 8px; align-items: center; }
+  .namerow input {
+    flex: 1; min-width: 0; font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px;
+    border-radius: 12px; border: 0; background: var(--cream); color: var(--ink);
+  }
+  .namerow input::placeholder { color: #a8a497; font-weight: 600; }
+  .namerow .x { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.14); color: var(--cream); font-size: 20px; font-weight: 800; flex: 0 0 auto; }
+  .namerow .x:disabled { opacity: .25; }
+  .modal .addrow { margin: 10px 0 0; padding: 12px; border-radius: 12px; background: rgba(255,255,255,.12); color: var(--cream); font-weight: 700; }
+  .modal .spacer { flex: 1; min-height: 16px; }
+  .modal .go { padding: 16px; border-radius: 14px; background: var(--gold); color: var(--ink); font-weight: 900; font-size: 18px; }
+  .modal .cancel { margin-top: 8px; padding: 12px; border-radius: 12px; background: transparent; color: var(--cream); font-weight: 700; opacity: .8; }
+  .modal .note { font-size: 12px; opacity: .6; text-align: center; margin: 10px 0 0; }
+
 </style>
 </head>
 <body>
@@ -330,6 +355,17 @@
 </section>
 
 <section id="screen-score" class="screen" hidden></section>
+
+<div id="setup" class="modal" hidden>
+  <h2>Who's playing?</h2>
+  <p class="sub">Names go on the scorecard. Tee order is up to you.</p>
+  <div id="names" class="names"></div>
+  <button id="setup-add" class="addrow" type="button">+ Add player</button>
+  <div class="spacer"></div>
+  <button id="setup-go" class="go" type="button">Start round</button>
+  <button id="setup-cancel" class="cancel" type="button">Cancel</button>
+  <p class="note">Starting reshuffles both piles, clears your hand, and clears the scorecard.</p>
+</div>
 
 <nav>
   <div class="tabs">
@@ -549,15 +585,17 @@
     render(true);
   }
   function newRound() {
-    if (!confirm('Start a new round? This reshuffles both piles, clears your hand, and clears the scorecard. Player names stay.')) return;
+    openSetup(score.players);
+  }
+  function startRound(names) {
     state = freshState();
     save();
     render(true);
-    score.scores = emptyScores(score.players.length);
-    score.hole = 0;
+    score = { players: names, scores: emptyScores(names.length), hole: 0 };
     scoreEdit = false;
     saveScore();
     renderScore();
+    showTab('cards');
   }
   document.getElementById('draw-format').addEventListener('click', drawFormat);
   document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
@@ -699,6 +737,61 @@
     renderScore();
   });
 
+  // ---------- New round setup ----------
+  var setupEl = document.getElementById('setup');
+  var namesEl = document.getElementById('names');
+  var setupNames = [];
+  function renderSetup() {
+    namesEl.innerHTML = '';
+    setupNames.forEach(function (n, i) {
+      var row = document.createElement('div');
+      row.className = 'namerow';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.value = n;
+      input.placeholder = 'Player ' + (i + 1);
+      input.autocapitalize = 'words';
+      input.autocomplete = 'off';
+      input.enterKeyHint = i === setupNames.length - 1 ? 'done' : 'next';
+      input.addEventListener('input', function () { setupNames[i] = input.value; });
+      input.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var next = namesEl.querySelectorAll('input')[i + 1];
+        if (next) next.focus(); else input.blur();
+      });
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'x';
+      x.textContent = '×';
+      x.disabled = setupNames.length <= 1;
+      x.addEventListener('click', function () { setupNames.splice(i, 1); renderSetup(); });
+      row.appendChild(input);
+      row.appendChild(x);
+      namesEl.appendChild(row);
+    });
+  }
+  function openSetup(names) {
+    setupNames = (names && names.length ? names : ['', '', '', '']).map(String);
+    renderSetup();
+    setupEl.hidden = false;
+    var first = namesEl.querySelector('input');
+    if (first && !first.value) first.focus();
+  }
+  function closeSetup() { setupEl.hidden = true; }
+  document.getElementById('setup-add').addEventListener('click', function () {
+    setupNames.push('');
+    renderSetup();
+    var inputs = namesEl.querySelectorAll('input');
+    inputs[inputs.length - 1].focus();
+  });
+  document.getElementById('setup-cancel').addEventListener('click', closeSetup);
+  document.getElementById('setup-go').addEventListener('click', function () {
+    var names = setupNames.map(function (n, i) { return n.trim() || ('Player ' + (i + 1)); });
+    closeSetup();
+    startRound(names);
+  });
+
   // ---------- Tabs ----------
   var TAB_KEY = 'fore.tab';
   function showTab(name) {
@@ -715,6 +808,9 @@
   var savedTab = null;
   try { savedTab = localStorage.getItem(TAB_KEY); } catch (e) {}
   showTab(savedTab === 'score' ? 'score' : 'cards');
+  var firstRun = false;
+  try { firstRun = !localStorage.getItem(SCORE_KEY) && !localStorage.getItem(STORE_KEY); } catch (e) {}
+  if (firstRun) openSetup(null);
 
   // Install prompt (Android/desktop Chrome). iOS uses Share > Add to Home Screen.
   var installBtn = document.getElementById('install');
