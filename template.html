@@ -76,28 +76,73 @@
     padding: 4px 16px; gap: 12px; min-height: 0;
   }
   .card {
+    --accent: #6c6a60;
+    --accent-dark: #4a4840;
+    --paper-a: #fbf7ea;
+    --paper-b: #efe6cc;
     width: min(100%, 360px, calc(58vh * 5 / 7));
     aspect-ratio: 5 / 7;
-    background: var(--cream); color: var(--ink);
+    color: var(--ink);
     border-radius: var(--radius);
-    box-shadow: 0 18px 40px rgba(0,0,0,.45), inset 0 0 0 6px var(--cream), inset 0 0 0 8px rgba(0,0,0,.08);
-    padding: 26px 24px;
+    border: 1px solid rgba(0,0,0,.18);
+    background:
+      /* paper grain */
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+      /* striped band along the top */
+      repeating-linear-gradient(135deg, var(--accent) 0 9px, var(--accent-dark) 9px 18px) top / 100% 12px no-repeat,
+      linear-gradient(165deg, var(--paper-a), var(--paper-b));
+    box-shadow: 0 18px 40px rgba(0,0,0,.45);
+    padding: 34px 24px 24px;
     display: flex; flex-direction: column;
     position: relative; overflow: hidden;
     transform-origin: 50% 60%;
   }
+  .card.format { --accent: var(--format); --accent-dark: #8f3a13; }
+  .card.keeps  { --accent: var(--keeps);  --accent-dark: #1d4382; --paper-a: #f5f8fd; --paper-b: #e2eaf6; }
+  /* inner frame */
+  .card::before {
+    content: ''; position: absolute; inset: 18px 8px 8px; pointer-events: none;
+    border: 1.5px solid var(--accent); border-radius: 12px; opacity: .3;
+  }
+  /* watermark in the corner: flag for Fore-Mats, ball for Power Ups */
+  .card::after {
+    content: ''; position: absolute; right: -28px; bottom: -22px; width: 190px; height: 190px;
+    background: var(--accent); opacity: .08; pointer-events: none;
+    -webkit-mask: var(--mark) center / contain no-repeat; mask: var(--mark) center / contain no-repeat;
+  }
+  .card.format::after {
+    --mark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M38 8h6v84h-6z'/><path d='M44 10l44 14-44 16z'/><ellipse cx='41' cy='92' rx='26' ry='6'/></svg>");
+  }
+  .card.keeps::after {
+    --mark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44'/><g fill='white'><circle cx='36' cy='36' r='5'/><circle cx='56' cy='32' r='5'/><circle cx='46' cy='52' r='5'/><circle cx='66' cy='50' r='5'/><circle cx='32' cy='56' r='5'/><circle cx='54' cy='70' r='5'/></g></svg>");
+  }
   .card.empty { align-items: center; justify-content: center; text-align: center; color: var(--muted); font-size: 18px; }
+  .card.empty::after { display: none; }
+  .card .pip {
+    position: absolute; font-size: 11px; font-weight: 900; letter-spacing: .05em; color: var(--accent); opacity: .55;
+  }
+  .card .pip.br { bottom: 12px; right: 16px; }
+  .card .stamp {
+    position: absolute; left: 50%; top: 50%; z-index: 2;
+    transform: translate(-50%, -50%) rotate(-18deg);
+    padding: 8px 22px; border: 5px solid var(--format); border-radius: 10px;
+    color: var(--format); font-size: 44px; font-weight: 900; letter-spacing: .12em;
+    background: rgba(251,247,234,.7); opacity: .92; pointer-events: none;
+    animation: stamp .25s cubic-bezier(.2,.9,.3,1.3);
+  }
   .card.deal { animation: deal .38s cubic-bezier(.2,.9,.3,1.2); }
   @keyframes deal {
     from { transform: translateY(40px) rotate(-4deg) scale(.92); opacity: 0; }
     to   { transform: none; opacity: 1; }
   }
   .card .pile {
-    font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+    font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
   }
-  .card.format .pile { color: var(--format); }
-  .card.keeps .pile { color: var(--keeps); }
-  .card h2 { margin: 10px 0 14px; font-size: 32px; line-height: 1.05; }
+  .card h2 { margin: 8px 0 14px; font-size: 32px; line-height: 1.05; }
+  .card h2::after {
+    content: ''; display: block; width: 46px; height: 4px; border-radius: 2px;
+    background: var(--accent); margin-top: 8px;
+  }
   .card.format h2 { padding-right: 56px; }
   .card .body { font-size: 18px; line-height: 1.4; overflow: auto; }
   .card.long .body { font-size: 15px; line-height: 1.35; }
@@ -112,32 +157,26 @@
   .card .body ul.cols { columns: 2; column-gap: 10px; padding-left: 16px; font-size: .88em; line-height: 1.25; }
   .card .body ul.cols li { break-inside: avoid; margin-bottom: 2px; }
   .card .points {
-    position: absolute; top: 18px; right: 18px;
-    width: 52px; height: 52px; border-radius: 50%;
+    position: absolute; top: 26px; right: 18px;
+    width: 54px; height: 54px; border-radius: 50%;
     background: var(--format); color: #fff;
+    box-shadow: 0 0 0 3px var(--paper-a), 0 0 0 5px var(--format);
+    transform: rotate(8deg);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     font-weight: 800; font-size: 22px; line-height: 1;
   }
   .card .points.wide { font-size: 17px; }
   .card .points small { font-size: 9px; letter-spacing: .1em; font-weight: 700; }
   .card .format {
-    display: inline-block; margin: -6px 0 12px; padding: 3px 9px; border-radius: 6px;
+    display: inline-block; margin: -4px 0 12px; padding: 3px 9px; border-radius: 6px;
     background: rgba(200,84,31,.12); color: var(--format);
     font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
   }
+  .card .foot { position: relative; }
   .card.xlong .body { font-size: 13.5px; line-height: 1.3; }
   .card.xlong .body p, .card.xlong .body ul { margin-bottom: 8px; }
   .card.xlong h2 { font-size: 22px; margin-bottom: 10px; }
   .card .foot { margin-top: auto; font-size: 12px; color: var(--muted); }
-  .card.played::after {
-    content: 'PLAYED';
-    position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%) rotate(-18deg);
-    padding: 8px 22px; border: 5px solid var(--format); border-radius: 10px;
-    color: var(--format); font-size: 44px; font-weight: 900; letter-spacing: .12em;
-    opacity: .82; pointer-events: none;
-    animation: stamp .25s cubic-bezier(.2,.9,.3,1.3);
-  }
   @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
 
   .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 48px; }
@@ -312,7 +351,8 @@
         chars += b.text.length;
       }
     });
-    var html = '<div class="pile">' + (c.pile === 'format' ? 'Fore-Mat · this hole' : 'Power Up') + '</div>';
+    var html = '<span class="pip br">FORE</span>';
+    html += '<div class="pile">' + (c.pile === 'format' ? 'Fore-Mat · this hole' : 'Power Up') + '</div>';
     if (c.points != null) {
       html += '<div class="points' + (String(c.points).length > 2 ? ' wide' : '') + '">' + esc(c.points) + '<small>PTS</small></div>';
     }
@@ -371,7 +411,7 @@
     } else {
       var r = cardHtml(c);
       cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + cls;
-      cardEl.innerHTML = r.html;
+      cardEl.innerHTML = r.html + (cls ? '<div class="stamp">PLAYED</div>' : '');
     }
     if (animate) {
       void cardEl.offsetWidth;
