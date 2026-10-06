@@ -109,6 +109,8 @@
   }
   .card .body ul { margin: 0 0 12px; padding-left: 18px; }
   .card .body li { margin: 0 0 4px; }
+  .card .body ul.cols { columns: 2; column-gap: 10px; padding-left: 16px; font-size: .88em; line-height: 1.25; }
+  .card .body ul.cols li { break-inside: avoid; margin-bottom: 2px; }
   .card .points {
     position: absolute; top: 18px; right: 18px;
     width: 52px; height: 52px; border-radius: 50%;
@@ -300,7 +302,9 @@
     c.body.forEach(function (b) {
       if (b.type === 'list') {
         if (b.label) { body += '<div class="label">' + esc(b.label) + '</div>'; chars += b.label.length; }
-        body += '<ul>';
+        // Many short items (like a list of formats) read better in two columns.
+        var cols = b.items.length >= 6 && b.items.every(function (it) { return it.length <= 22; });
+        body += cols ? '<ul class="cols">' : '<ul>';
         b.items.forEach(function (it) { body += '<li>' + esc(it) + '</li>'; chars += it.length; });
         body += '</ul>';
       } else {

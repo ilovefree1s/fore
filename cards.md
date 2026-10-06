@@ -129,9 +129,23 @@ The card player chooses any Fore-Mat in the deck and decides whether the
 hole is worth 1 point or 2 points.
 
 Pick From:
-- Scramble, Shamble, Alternate Shot, Four Ball, Hi/Lo, Bingo-Bango-Bongo,
-  Worst Ball Scramble, Wolf, One Club, Pick 3, Tin Cup, Reversal, Box
-  Pick, Random Partner, Double Match, Wait Fore It, Heavy Is The Head.
+- Scramble
+- Shamble
+- Alternate Shot
+- Four Ball
+- Hi/Lo
+- Bingo-Bango-Bongo
+- Worst Ball Scramble
+- Wolf
+- One Club
+- Pick 3
+- Tin Cup
+- Reversal
+- Box Pick
+- Random Partner
+- Double Match
+- Wait Fore It
+- Heavy Is The Head
 
 ## Box Pick
 format: 1v1v1v1
