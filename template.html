@@ -169,13 +169,12 @@
   var PILES = ['format', 'keeps'];
 
   var sounds = {
-    draw: new Audio('sounds/draw.wav'),
-    shuffle: new Audio('sounds/shuffle.wav')
+    draw: new Audio('sounds/draw.wav')
   };
   sounds.draw.preload = 'auto';
-  sounds.shuffle.preload = 'auto';
   function play(name) {
     var s = sounds[name];
+    if (!s) return;
     try { s.currentTime = 0; var p = s.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
   }
 
@@ -242,19 +241,14 @@
     }
   }
   function draw(pile) {
-    if (!state[pile].length) {
-      state[pile] = shuffledPile(pile);
-      play('shuffle');
-    } else {
-      play('draw');
-    }
+    if (!state[pile].length) state[pile] = shuffledPile(pile);
+    play('draw');
     state.current = { pile: pile, id: state[pile].pop() };
     save();
     render(true);
   }
   function shuffleAll() {
     state = freshState();
-    play('shuffle');
     save();
     render(false);
   }

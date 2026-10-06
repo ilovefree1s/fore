@@ -3,10 +3,10 @@
 
 // Rule 2: the build version is stamped in here so the page can compare it
 // against its own version before showing an update banner.
-const VERSION = '0.1.3';
+const VERSION = '0.1.4';
 const PAGE_CACHE = 'fore-page-' + VERSION;
 const ASSET_CACHE = 'fore-assets-' + VERSION;
-const ASSETS = ["manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","sounds/draw.wav","sounds/shuffle.wav"];
+const ASSETS = ["manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","sounds/draw.wav"];
 const SCOPE = self.registration.scope;
 const PAGE_KEY = new URL('index.html', SCOPE).href;
 const NAV_TIMEOUT_MS = 1200;

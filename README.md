@@ -14,7 +14,7 @@ card, show the group. Modeled on the FORE! Cards deck, for regular ball golf.
 | `template.html` | The whole app. Placeholder comments get filled by the build. |
 | `sw.template.js` | Service worker source. Version and asset list stamped in at build. |
 | `build.js` | Bumps `VERSION`, parses cards, generates icons, emits `docs/`. |
-| `sounds/` | `draw.wav` and `shuffle.wav`. Copied into the build and precached. |
+| `sounds/` | `draw.wav` is shipped and precached. `shuffle.wav` is parked here, unused for now. |
 | `docs/` | Build output. Served by GitHub Pages. Commit it. |
 | `serve.js` | Local static server for `docs/` with no-cache headers. |
 

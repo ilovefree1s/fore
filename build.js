@@ -175,7 +175,8 @@ fs.mkdirSync(OUT, { recursive: true });
 console.log(`FORE build ${prev} -> ${VERSION}`);
 
 const icons = [180, 192, 512];
-const sounds = fs.readdirSync(path.join(ROOT, 'sounds')).filter((f) => f.endsWith('.wav')).sort();
+// Only the sounds the app actually plays. shuffle.wav stays in sounds/ but is not shipped for now.
+const sounds = ['draw.wav'];
 const assets = [
   'manifest.webmanifest',
   ...icons.map((s) => `icon-${s}.png`),
