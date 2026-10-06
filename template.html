@@ -88,11 +88,12 @@
     background:
       /* paper grain */
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
-      /* striped band along the top */
+      /* striped bands along the top and bottom */
       repeating-linear-gradient(135deg, var(--accent) 0 9px, var(--accent-dark) 9px 18px) top / 100% 12px no-repeat,
+      repeating-linear-gradient(135deg, var(--accent) 0 9px, var(--accent-dark) 9px 18px) bottom / 100% 12px no-repeat,
       linear-gradient(165deg, var(--paper-a), var(--paper-b));
     box-shadow: 0 18px 40px rgba(0,0,0,.45);
-    padding: 34px 24px 24px;
+    padding: 34px 24px 32px;
     display: flex; flex-direction: column;
     position: relative; overflow: hidden;
     transform-origin: 50% 60%;
@@ -101,12 +102,12 @@
   .card.keeps  { --accent: var(--keeps);  --accent-dark: #1d4382; --paper-a: #f5f8fd; --paper-b: #e2eaf6; }
   /* inner frame */
   .card::before {
-    content: ''; position: absolute; inset: 18px 8px 8px; pointer-events: none;
+    content: ''; position: absolute; inset: 18px 8px 18px; pointer-events: none;
     border: 1.5px solid var(--accent); border-radius: 12px; opacity: .3;
   }
   /* watermark in the corner: flag for Fore-Mats, ball for Power Ups */
   .card::after {
-    content: ''; position: absolute; right: -28px; bottom: -22px; width: 190px; height: 190px;
+    content: ''; position: absolute; right: -28px; bottom: -12px; width: 190px; height: 190px;
     background: var(--accent); opacity: .08; pointer-events: none;
     -webkit-mask: var(--mark) center / contain no-repeat; mask: var(--mark) center / contain no-repeat;
   }
@@ -121,7 +122,7 @@
   .card .pip {
     position: absolute; font-size: 11px; font-weight: 900; letter-spacing: .05em; color: var(--accent); opacity: .55;
   }
-  .card .pip.br { bottom: 12px; right: 16px; }
+  .card .pip.br { bottom: 21px; right: 16px; }
   .card .stamp {
     position: absolute; left: 50%; top: 50%; z-index: 2;
     transform: translate(-50%, -50%) rotate(-18deg);
