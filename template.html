@@ -84,8 +84,8 @@
   .stage .card.keeps { touch-action: none; cursor: grab; }
   .card.dragging { transition: none !important; animation: none !important; cursor: grabbing; }
   .card.settle { transition: transform .22s cubic-bezier(.2,.9,.3,1.2), opacity .22s; }
-  .swipehint { font-size: 11px; opacity: .8; letter-spacing: .02em; flex: 1; min-width: 0; }
-  .swipehint[hidden] { display: none; }
+  .swipehint { font-size: 11px; opacity: .8; letter-spacing: .02em; text-align: center; min-height: 16px; margin-top: -4px; }
+  .swipehint[hidden] { visibility: hidden; display: block; }
   @keyframes raise {
     from { transform: translateY(160px) scale(.45); opacity: .4; }
     to   { transform: none; opacity: 1; }
@@ -196,13 +196,12 @@
   .card .foot { margin-top: auto; font-size: 3.33cqw; color: var(--muted); }
   @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
 
-  .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 40px; align-items: center; justify-content: space-between; }
-  .pill {
-    flex: 0 0 auto; padding: 9px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
-    background: rgba(255,255,255,.14); color: var(--cream);
-  }
-  .pill[hidden] { display: none; }
-  .pill:active { background: rgba(255,255,255,.26); }
+  .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 52px; align-items: stretch; }
+  .act small { display: block; font-size: 11px; font-weight: 600; opacity: .85; margin-top: 1px; }
+  .act.draw { background: var(--keeps); color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.3); padding: 9px 10px; font-size: 15px; white-space: nowrap; }
+  .act.draw:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  .act.quiet { background: rgba(255,255,255,.14); color: var(--cream); padding: 9px 10px; font-size: 15px; white-space: nowrap; }
+  .act:disabled { opacity: .35; }
   .act {
     flex: 1; padding: 13px 12px; border-radius: 14px; font-weight: 800; font-size: 17px;
     background: rgba(255,255,255,.14); color: var(--cream);
@@ -420,9 +419,10 @@
   <main>
     <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
     <div id="actions" class="actions">
-      <span id="swipehint" class="swipehint" hidden>&#8595; Swipe down to lower it into your hand</span>
-      <button id="putback" class="pill" type="button" hidden>Put back on deck</button>
+      <button id="draw-keeps" class="act draw" type="button">Draw Power Up<small id="count-keeps"></small></button>
+      <button id="putback" class="act quiet" type="button">Return card<small>to top of deck</small></button>
     </div>
+    <div id="swipehint" class="swipehint" hidden>&#8595; Swipe the raised card down to lower it into your hand</div>
   </main>
   <div class="fanzone">
     <div id="fan" class="fan"></div>
@@ -612,7 +612,8 @@
   function renderActions() {
     var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
     document.getElementById('swipehint').hidden = !raised;
-    document.getElementById('putback').hidden = !(raised && !raised.played);
+    document.getElementById('putback').disabled = !(raised && !raised.played);
+    document.getElementById('count-keeps').textContent = state.keeps.length + ' left';
   }
   // The bottom-left button is whatever you would do next on this screen:
   // draw when nothing is raised, Play or Discard for the raised card, and
@@ -631,8 +632,8 @@
       b.className = 'play';
       b.textContent = 'Play';
     } else {
-      b.className = 'draw';
-      b.innerHTML = 'Draw Power Up<small>' + state.keeps.length + ' left</small>';
+      b.className = 'on';
+      b.textContent = 'Cards';
     }
   }
   // The fan: every hand card along the bottom in an arc, overlapping more as
@@ -680,7 +681,7 @@
   // allows, at 5:7, capped at 360px wide. The action row always reserves
   // its height so the card does not jump when one is raised.
   function fitCard() {
-    var avail = mainEl.clientHeight - 8 - 40 - 10;
+    var avail = mainEl.clientHeight - 8 - 52 - 10 - 14;
     var w = Math.min(360, mainEl.clientWidth - 32, Math.floor(avail * 5 / 7));
     if (w > 0) mainEl.style.setProperty('--cardw', w + 'px');
   }
@@ -1068,8 +1069,8 @@
     var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
     if (raised && raised.played) discardPlayed();
     else if (raised) playCard();
-    else drawPowerUp();
   });
+  document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
   document.getElementById('tab-score').addEventListener('click', function () { showTab('score'); });
   var savedTab = null;
   try { savedTab = localStorage.getItem(TAB_KEY); } catch (e) {}
