@@ -597,7 +597,7 @@
     if (state.view.type !== 'hand') return;
     var h = state.hand[state.view.i];
     if (!h) return;
-    actionsEl.appendChild(button('', 'Put back', putBack));
+    actionsEl.appendChild(button('', 'Back to hand', putBack));
     actionsEl.appendChild(h.played ? button('danger', 'Discard', discardPlayed) : button('primary', 'Play', playCard));
   }
   // The fan: every hand card along the bottom in an arc, overlapping more as
