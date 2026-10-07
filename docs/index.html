@@ -73,6 +73,8 @@
   .tool:active { background: rgba(255,255,255,.25); }
   #install { display: none; }
   #install.show { display: inline-block; }
+  #fullscreen[hidden] { display: none; }
+  #fullscreen.on { background: var(--cream); color: var(--felt-deep); }
 
   main {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -408,6 +410,7 @@
   <h1>FORE</h1>
   <div class="tools">
     <button id="install" class="tool" type="button">Install</button>
+    <button id="fullscreen" class="tool" type="button" hidden>Full screen</button>
     <button id="shuffle" class="tool" type="button">New Round</button>
   </div>
 </header>
@@ -470,7 +473,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.47';
+  var VERSION = '0.1.48';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -949,6 +952,7 @@
     if (ss && typeof ss === 'object') {
       if (typeof ss.me === 'string') settings.me = ss.me;
       if (typeof ss.drawer === 'boolean') settings.drawer = ss.drawer;
+      if (typeof ss.fullscreen === 'boolean') settings.fullscreen = ss.fullscreen;
     }
   } catch (e) {}
   function saveSettings() {
@@ -977,6 +981,51 @@
     browseEl.scrollTop = 0;
   }
   document.getElementById('browse-back').addEventListener('click', function () { browseEl.hidden = true; });
+
+  // ---------- Full screen (Android) ----------
+  // Chrome on Android hides the status bar and the navigation bar when a page
+  // asks for full screen; swipe from an edge peeks them back. It needs a tap
+  // to start, so the first tap after launch does it. iPhone ignores this.
+  var fsBtn = document.getElementById('fullscreen');
+  var fsSupported = !!(document.documentElement.requestFullscreen && document.fullscreenEnabled);
+  var fsArmed = fsSupported && settings.fullscreen !== false;
+  function enterFullscreen() {
+    var p = document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+    if (p && p.catch) p.catch(function () {});
+  }
+  function renderFs() {
+    if (!fsSupported) return;
+    fsBtn.hidden = false;
+    var on = !!document.fullscreenElement;
+    fsBtn.classList.toggle('on', on);
+    fsBtn.textContent = on ? 'Exit full screen' : 'Full screen';
+  }
+  if (fsSupported) {
+    document.addEventListener('pointerdown', function () {
+      if (fsArmed && !document.fullscreenElement) enterFullscreen();
+    }, true);
+    document.addEventListener('fullscreenchange', function () {
+      // Leaving by the system back gesture stops the auto re-entry for this launch.
+      if (!document.fullscreenElement) fsArmed = false;
+      renderFs();
+      fitCard();
+      renderFan();
+    });
+    fsBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (document.fullscreenElement) {
+        settings.fullscreen = false;
+        fsArmed = false;
+        document.exitFullscreen().catch(function () {});
+      } else {
+        settings.fullscreen = true;
+        fsArmed = true;
+        enterFullscreen();
+      }
+      saveSettings();
+    });
+    renderFs();
+  }
 
   // ---------- New round setup ----------
   var setupEl = document.getElementById('setup');
