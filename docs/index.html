@@ -58,6 +58,9 @@
     padding: calc(12px + var(--safe-top)) 16px 4px;
     display: flex; align-items: center; justify-content: space-between;
   }
+  header[hidden] { display: none; }
+  /* The cards screen has no header, so it carries the notch padding itself. */
+  #screen-cards { padding-top: calc(10px + var(--safe-top)); }
   header h1 {
     margin: 0; font-size: 26px; letter-spacing: 0.18em; font-weight: 800;
     text-shadow: 0 2px 0 rgba(0,0,0,.25);
@@ -450,7 +453,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.33';
+  var VERSION = '0.1.34';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -974,8 +977,9 @@
     document.getElementById('screen-cards').hidden = !cards;
     scoreEl.hidden = cards;
     document.getElementById('tab-cards').classList.toggle('on', cards);
+    document.querySelector('header').hidden = cards;
     document.getElementById('tab-score').classList.toggle('on', !cards);
-    if (!cards) renderScore();
+    if (!cards) renderScore(); else { fitCard(); renderFan(); }
     try { localStorage.setItem(TAB_KEY, cards ? 'cards' : 'score'); } catch (e) {}
   }
   document.getElementById('tab-cards').addEventListener('click', function () { showTab('cards'); });
