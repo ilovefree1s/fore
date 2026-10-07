@@ -714,9 +714,7 @@
   }
   window.addEventListener('resize', function () { fitCard(); fitText(); renderFan(); });
 
-  function drawFormat(silent) {
-    var before = JSON.stringify(state);
-    var replacing = state.hole ? BY_ID[state.hole].title : null;
+  function drawFormat() {
     if (!state.format.length) state.format = shuffledPile('format');
     var id = state.format.pop();
     // Heavy Is The Head cannot be played on hole 1. Slip it back into the pile and draw again.
@@ -730,13 +728,6 @@
     play('draw');
     save();
     render(true);
-    if (replacing && !silent) {
-      toast('Replaced ' + replacing + ' with ' + BY_ID[id].title, function () {
-        state = JSON.parse(before);
-        save();
-        render(false);
-      });
-    }
   }
   function drawPowerUp() {
     if (!state.keeps.length) state.keeps = shuffledPile('keeps');
