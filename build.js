@@ -235,6 +235,7 @@ write('manifest.webmanifest', JSON.stringify({
   start_url: './',
   scope: './',
   display: 'standalone',
+  display_override: ['fullscreen', 'standalone'],
   orientation: 'portrait',
   background_color: THEME,
   theme_color: THEME,
