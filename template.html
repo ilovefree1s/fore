@@ -31,7 +31,7 @@
   * { box-sizing: border-box; }
   /* iOS standalone can leave a strip below the layout; paint it felt and
      size the body to the real viewport so the layout reaches the bottom. */
-  html { background: var(--felt-deep); }
+  html { background: var(--felt-deep); overscroll-behavior: none; }
   html, body { margin: 0; height: 100%; }
   body { height: 100vh; height: 100dvh; }
   body {
@@ -86,7 +86,11 @@
   .stage { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
   .stage .card { width: var(--cardw, 360px); }
   .card.raise { animation: raise .28s cubic-bezier(.2,.9,.3,1.15); }
-  .stage .card.keeps { touch-action: none; cursor: grab; }
+  /* The body is a scroll container, so touch-action must be set on it too or
+     a finger on the text pans instead of dragging. Hand cards never scroll. */
+  .stage .card.keeps, .stage .card.keeps * { touch-action: none; }
+  .stage .card.keeps { cursor: grab; }
+  .stage .card.keeps .body { overflow: hidden; }
   .card.dragging { transition: none !important; animation: none !important; cursor: grabbing; }
   .card.settle { transition: transform .22s cubic-bezier(.2,.9,.3,1.2), opacity .22s; }
   .swipehint { font-size: 11px; opacity: .8; letter-spacing: .02em; text-align: center; min-height: 16px; margin-top: -4px; }
