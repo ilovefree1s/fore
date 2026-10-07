@@ -251,6 +251,15 @@
     border: 2.5px solid var(--format); padding: 2px 5px; border-radius: 4px; background: rgba(251,247,234,.85);
   }
   .fancard.on { box-shadow: 0 0 0 3px var(--gold), 0 14px 22px rgba(0,0,0,.5); }
+  /* Hidden hand: every card shows its back, so the count is visible but not the cards. */
+  .fancard.back {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.22), transparent 42%),
+      repeating-linear-gradient(135deg, #2a5fb3 0 6px, #1d4382 6px 12px);
+    border: 2px solid rgba(255,255,255,.35); filter: none;
+  }
+  .fancard.back .k, .fancard.back .t { visibility: hidden; }
+  .fancard.back::after { display: none; }
   .fancard.pop { animation: pop .3s cubic-bezier(.2,.9,.3,1.2); }
   @keyframes pop { from { opacity: 0; margin-bottom: -60px; } }
   .fan .none {
@@ -264,7 +273,6 @@
   .topdraw .draw { flex: 1; min-width: 0; }
   .draw.slim.quiet { background: rgba(255,255,255,.14); color: var(--cream); box-shadow: 0 4px 0 rgba(0,0,0,.25); }
   .draw.slim.quiet.on { background: var(--cream); color: var(--felt-deep); }
-  .fanzone[hidden] { display: none; }
   .fan { touch-action: none; }
   .draw {
     width: 100%; padding: 16px 12px; border-radius: var(--radius);
@@ -504,7 +512,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.63';
+  var VERSION = '0.1.64';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -574,6 +582,7 @@
   var state = load() || freshState();
 
   var cardEl = document.getElementById('card');
+  var handHidden = false;
   var actionsEl = document.getElementById('actions');
   var fanEl = document.getElementById('fan');
   var mainEl = document.querySelector('main');
@@ -690,7 +699,7 @@
       var off = i - (n - 1) / 2;
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'fancard' + (h.played ? ' played' : '') + (i === cur ? ' on' : '') + (i === popIndex ? ' pop' : '');
+      b.className = 'fancard' + (h.played ? ' played' : '') + (i === cur ? ' on' : '') + (i === popIndex ? ' pop' : '') + (handHidden ? ' back' : '');
       b.style.setProperty('--x', (off * step) + 'px');
       b.style.setProperty('--y', (i === cur ? -12 : off * off * 1.4 - maxArc) + 'px');
       b.style.setProperty('--rot', (i === cur ? 0 : off * spread) + 'deg');
@@ -732,6 +741,7 @@
     return best;
   }
   fanEl.addEventListener('pointerdown', function (e) {
+    if (handHidden) return;
     var card = e.target.closest('.fancard');
     if (!card) return;
     var i = Number(card.dataset.i);
@@ -757,15 +767,13 @@
   fanEl.addEventListener('pointerup', endScrub);
   fanEl.addEventListener('pointercancel', endScrub);
 
-  // Hide hand: collapses the fan only. A raised card stays up on the stage,
-  // so you can show the group the one you are playing without showing the
-  // rest of your hand. Show hand or drawing a card brings the fan back.
-  var handHidden = false;
+  // Hide hand: the fan cards turn face down, so the group can see how many
+  // you hold but not what. A raised card stays up on the stage to show the
+  // one you are playing. Show hand or drawing a card turns them face up.
   function renderHideHand() {
     var b = document.getElementById('hide-hand');
     b.querySelector('span').textContent = handHidden ? 'Show hand' : 'Hide hand';
     b.classList.toggle('on', handHidden);
-    document.querySelector('.fanzone').hidden = handHidden;
   }
   document.getElementById('hide-hand').addEventListener('click', function () {
     handHidden = !handHidden;
