@@ -81,6 +81,11 @@
   .stage { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
   .stage .card { width: var(--cardw, 360px); }
   .card.raise { animation: raise .28s cubic-bezier(.2,.9,.3,1.15); }
+  .stage .card.keeps { touch-action: none; cursor: grab; }
+  .card.dragging { transition: none !important; animation: none !important; cursor: grabbing; }
+  .card.settle { transition: transform .22s cubic-bezier(.2,.9,.3,1.2), opacity .22s; }
+  .swipehint { font-size: 11px; opacity: .75; letter-spacing: .02em; min-height: 16px; margin-top: -2px; }
+  .swipehint[hidden] { visibility: hidden; display: block; }
   @keyframes raise {
     from { transform: translateY(160px) scale(.45); opacity: .4; }
     to   { transform: none; opacity: 1; }
@@ -405,6 +410,7 @@
   <main>
     <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
     <div id="actions" class="actions"></div>
+    <div id="swipehint" class="swipehint" hidden>&#8595; Swipe the card down to lower it into your hand</div>
   </main>
   <div class="fanzone">
     <div id="fan" class="fan"></div>
@@ -594,11 +600,16 @@
   }
   function renderActions() {
     actionsEl.innerHTML = '';
+    document.getElementById('swipehint').hidden = state.view.type !== 'hand';
     if (state.view.type !== 'hand') return;
     var h = state.hand[state.view.i];
     if (!h) return;
-    actionsEl.appendChild(button('', 'Back to hand', putBack));
-    actionsEl.appendChild(h.played ? button('danger', 'Discard', discardPlayed) : button('primary', 'Play', playCard));
+    if (h.played) {
+      actionsEl.appendChild(button('danger', 'Discard', discardPlayed));
+    } else {
+      actionsEl.appendChild(button('', 'Put back', putBack));
+      actionsEl.appendChild(button('primary', 'Play', playCard));
+    }
   }
   // The fan: every hand card along the bottom in an arc, overlapping more as
   // the hand grows. The raised card lifts out and gets the gold ring.
@@ -629,7 +640,7 @@
       b.style.setProperty('--s', i === cur ? 1.08 : 1);
       b.style.zIndex = i === cur ? 50 : 10 + i;
       b.innerHTML = '<div class="k">Power Up</div><div class="t">' + esc(BY_ID[h.id].title) + '</div>';
-      b.addEventListener('click', function () { if (i === cur) putBack(); else raise(i); });
+      b.addEventListener('click', function () { if (i === cur) lowerToHand(); else raise(i); });
       fanEl.appendChild(b);
     });
   }
@@ -646,7 +657,7 @@
   // allows, at 5:7, capped at 360px wide. The action row always reserves
   // its height so the card does not jump when one is raised.
   function fitCard() {
-    var avail = mainEl.clientHeight - 8 - 48 - 10;
+    var avail = mainEl.clientHeight - 8 - 48 - 10 - 18;
     var w = Math.min(360, mainEl.clientWidth - 32, Math.floor(avail * 5 / 7));
     if (w > 0) mainEl.style.setProperty('--cardw', w + 'px');
   }
@@ -689,11 +700,63 @@
     save();
     render('raise');
   }
-  function putBack() {
+  function lowerToHand() {
     state.view = { type: 'hole' };
     save();
     render(false);
   }
+  // Put back returns an unplayed card to the top of the Power Up deck.
+  function putBack() {
+    if (state.view.type !== 'hand') return;
+    var idx = state.view.i;
+    var h = state.hand[idx];
+    if (!h || h.played) return;
+    state.hand.splice(idx, 1);
+    state.keeps.push(h.id);
+    state.view = { type: 'hole' };
+    save();
+    render(false);
+    toast('Put ' + BY_ID[h.id].title + ' back on the deck', function () {
+      if (state.keeps[state.keeps.length - 1] === h.id) state.keeps.pop();
+      state.hand.splice(Math.min(idx, state.hand.length), 0, h);
+      state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
+      save();
+      render('raise');
+    });
+  }
+  // Hold the raised card and swipe it down toward the fan to lower it.
+  var drag = null;
+  cardEl.addEventListener('pointerdown', function (e) {
+    if (state.view.type !== 'hand') return;
+    drag = { y: e.clientY, dy: 0 };
+    try { cardEl.setPointerCapture(e.pointerId); } catch (err) {}
+    cardEl.classList.remove('settle');
+    cardEl.classList.add('dragging');
+  });
+  cardEl.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    drag.dy = Math.max(0, e.clientY - drag.y);
+    cardEl.style.transform = 'translateY(' + drag.dy + 'px) scale(' + (1 - drag.dy / 1400) + ')';
+    cardEl.style.opacity = String(Math.max(.35, 1 - drag.dy / 500));
+  });
+  function endDrag() {
+    if (!drag) return;
+    var dy = drag.dy;
+    drag = null;
+    cardEl.classList.remove('dragging');
+    if (dy > 90) {
+      cardEl.style.transform = '';
+      cardEl.style.opacity = '';
+      lowerToHand();
+    } else {
+      cardEl.classList.add('settle');
+      cardEl.style.transform = '';
+      cardEl.style.opacity = '';
+      setTimeout(function () { cardEl.classList.remove('settle'); }, 240);
+    }
+  }
+  cardEl.addEventListener('pointerup', endDrag);
+  cardEl.addEventListener('pointercancel', endDrag);
   function playCard() {
     if (state.view.type !== 'hand') return;
     state.hand[state.view.i].played = true;
