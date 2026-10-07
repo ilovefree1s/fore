@@ -65,8 +65,10 @@
   header[hidden] { display: none; }
   /* The cards screen has no header, so it carries the notch padding itself. */
   #screen-cards { padding-top: calc(10px + var(--safe-top)); }
-  #fs-toggle[hidden] { display: none; }
-  #fs-toggle.on { background: var(--cream); color: var(--felt-deep); }
+  .fs-toggle[hidden] { display: none; }
+  .fs-toggle.on { background: var(--cream); color: var(--felt-deep); }
+  .modal .fs-toggle { align-self: center; margin-top: 18px; }
+  .modal.setup .fs-toggle { align-self: flex-end; margin: 0 0 6px; }
   .tools { display: flex; gap: 8px; }
   .tool {
     background: rgba(255,255,255,.12); color: var(--cream);
@@ -412,7 +414,7 @@
 </div>
 
 <header>
-  <button id="fs-toggle" class="tool" type="button" hidden>Full screen: Off</button>
+  <button class="tool fs-toggle" type="button" hidden>Full screen: Off</button>
   <div class="tools">
     <button id="install" class="tool" type="button">Install</button>
     <button id="shuffle" class="tool" type="button">New Round</button>
@@ -446,10 +448,12 @@
   <p class="sub" id="launch-sub"></p>
   <button id="launch-continue" class="go" type="button">Continue round</button>
   <button id="launch-new" class="cancel" type="button">New round<small>Pick players and start fresh</small></button>
+  <button class="tool fs-toggle" type="button" hidden>Full screen: Off</button>
   <div class="spacer"></div>
 </div>
 
-<div id="setup" class="modal" hidden>
+<div id="setup" class="modal setup" hidden>
+  <button class="tool fs-toggle" type="button" hidden>Full screen: Off</button>
   <h2>Who's playing?</h2>
   <p class="sub">You plus three. Your name is remembered for next time.</p>
   <div id="names" class="names"></div>
@@ -1013,13 +1017,15 @@
     var p = document.documentElement.requestFullscreen({ navigationUI: 'hide' });
     if (p && p.catch) p.catch(function () {});
   }
-  var fsToggle = document.getElementById('fs-toggle');
+  var fsToggles = Array.prototype.slice.call(document.querySelectorAll('.fs-toggle'));
   function renderFsToggle() {
     if (!fsSupported) return;
-    fsToggle.hidden = false;
     var on = !!document.fullscreenElement;
-    fsToggle.classList.toggle('on', on);
-    fsToggle.textContent = 'Full screen: ' + (on ? 'On' : 'Off');
+    fsToggles.forEach(function (b) {
+      b.hidden = false;
+      b.classList.toggle('on', on);
+      b.textContent = 'Full screen: ' + (on ? 'On' : 'Off');
+    });
   }
   function setFullscreen(on) {
     settings.fullscreen = on;
@@ -1041,9 +1047,14 @@
       renderFan();
       renderFsToggle();
     });
-    fsToggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      setFullscreen(!document.fullscreenElement);
+    fsToggles.forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        setFullscreen(!document.fullscreenElement);
+      });
+      // The auto-enter fires on pointerdown anywhere; a tap on the toggle
+      // itself must not race it, so it is handled here only.
+      b.addEventListener('pointerdown', function (e) { e.stopPropagation(); }, true);
     });
     renderFsToggle();
   }
