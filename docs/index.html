@@ -386,7 +386,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.25';
+  var VERSION = '0.1.26';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -643,7 +643,7 @@
 
   // ---------- Undo toast ----------
   // One toast at a time, five seconds, with an optional Undo. Used for the taps
-  // that are easy to hit by accident: replacing the hole card, discarding, next hole.
+  // that are easy to hit by accident: replacing the hole card and discarding.
   var toastEl = document.getElementById('toast');
   var toastTimer = null, undoFn = null;
   function toast(msg, fn) {
@@ -743,7 +743,7 @@
         '</div></div>';
     });
     html += '<button class="nexthole" data-act="next"' + (h >= HOLES - 1 ? ' disabled' : '') + '>Next hole &rsaquo;</button>' +
-      '<div class="hint">' + (h >= HOLES - 1 ? 'Last hole.' : 'Moves to hole ' + (h + 2) + ' and draws its Fore-Mat.') + '</div>' +
+      '<div class="hint">' + (h >= HOLES - 1 ? 'Last hole.' : 'Draw the next Fore-Mat from the Cards tab when you get to the tee.') + '</div>' +
       '<div class="holestrip" id="holestrip">';
     for (var hc = 0; hc < HOLES; hc++) {
       var t = holeTotal(hc);
@@ -766,20 +766,7 @@
       score.hole = n;
     } else if (act === 'next') {
       if (score.hole >= HOLES - 1) return;
-      var prevHole = score.hole, before = JSON.stringify(state);
       score.hole += 1;
-      saveScore();
-      showTab('cards');
-      drawFormat(true);
-      toast('Hole ' + (score.hole + 1) + ': ' + BY_ID[state.hole].title, function () {
-        state = JSON.parse(before);
-        save();
-        render(false);
-        score.hole = prevHole;
-        saveScore();
-        showTab('score');
-      });
-      return;
     } else if (act === 'pt') {
       score.scores[score.hole][i] += n;
     }
