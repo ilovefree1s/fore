@@ -41,7 +41,7 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
   }
-  button { font: inherit; cursor: pointer; border: 0; }
+  button { font: inherit; cursor: pointer; border: 0; touch-action: manipulation; }
 
   #update {
     display: none;
@@ -195,7 +195,7 @@
   .hand.empty { display: none; }
   .hand .title {
     padding: 0 16px 6px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
-    text-transform: uppercase; opacity: .7;
+    text-transform: uppercase; opacity: .85;
   }
   .hand .strip {
     display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 8px;
@@ -244,7 +244,7 @@
     background: rgba(255,255,255,.1); color: var(--cream);
   }
   nav .tabs button.on { background: var(--cream); color: var(--felt-deep); }
-  .status { margin-top: 6px; text-align: center; font-size: 11px; opacity: .55; }
+  .status { margin-top: 6px; text-align: center; font-size: 11px; opacity: .75; }
 
   /* ---- scorecard ---- */
   #screen-score { overflow: auto; padding: 4px 16px 8px; }
@@ -258,7 +258,7 @@
   .step:active:not(:disabled) { filter: brightness(1.2); }
   .hole-title { flex: 1; text-align: center; min-width: 0; }
   .hole-title strong { display: block; font-size: 22px; letter-spacing: .12em; }
-  .hole-title span { font-size: 12px; opacity: .7; letter-spacing: .1em; }
+  .hole-title span { display: block; font-size: 12px; opacity: .9; letter-spacing: .04em; margin-top: 2px; }
   .player {
     background: rgba(255,255,255,.1); border-radius: 14px; padding: 10px 10px 10px 14px; margin-bottom: 8px;
     display: flex; align-items: center; gap: 10px;
@@ -266,7 +266,7 @@
   .player.lead { background: rgba(224,185,74,.2); box-shadow: inset 0 0 0 2px var(--gold); }
   .player .grow { flex: 1; min-width: 0; }
   .player .name { font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .player .sub { font-size: 12px; opacity: .8; margin-top: 3px; display: flex; gap: 8px; align-items: center; }
+  .player .sub { font-size: 13px; opacity: .9; margin-top: 3px; display: flex; gap: 8px; align-items: center; }
   .lead-tag { background: var(--gold); color: var(--ink); font-size: 9px; font-weight: 900; letter-spacing: .12em; padding: 2px 6px; border-radius: 4px; }
   .steps { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
   .steps .num { width: 40px; text-align: center; font-size: 24px; font-weight: 900; }
@@ -277,14 +277,33 @@
   .holestrip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
   .holestrip::-webkit-scrollbar { display: none; }
   .holechip {
-    flex: 0 0 auto; width: 48px; padding: 6px 0; border-radius: 10px;
+    flex: 0 0 auto; width: 58px; padding: 9px 0; border-radius: 12px;
     background: rgba(255,255,255,.1); color: var(--cream); text-align: center;
   }
-  .holechip strong { display: block; font-size: 15px; }
-  .holechip span { font-size: 10px; opacity: .7; }
+  .holechip strong { display: block; font-size: 18px; }
+  .holechip span { font-size: 11px; opacity: .9; }
   .holechip.done { background: rgba(255,255,255,.22); }
   .holechip.on { background: var(--cream); color: var(--felt-deep); }
-  .hint { font-size: 12px; opacity: .65; text-align: center; margin: 6px 0; }
+  .hint { font-size: 12px; opacity: .85; text-align: center; margin: 6px 0; }
+  .nexthole {
+    width: 100%; padding: 15px; border-radius: 14px; margin: 4px 0 2px;
+    background: var(--format); color: #fff; font-weight: 900; font-size: 18px;
+    box-shadow: 0 4px 0 rgba(0,0,0,.3);
+  }
+  .nexthole:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  .nexthole:disabled { opacity: .4; }
+
+  /* ---- undo toast ---- */
+  #toast {
+    position: fixed; left: 16px; right: 16px; bottom: calc(100px + var(--safe-bottom)); z-index: 15;
+    background: var(--ink); color: var(--cream); border-radius: 14px; padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    transform: translateY(16px); opacity: 0; pointer-events: none; transition: transform .2s, opacity .2s;
+  }
+  #toast.show { transform: none; opacity: 1; pointer-events: auto; }
+  #toast span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #toast button { background: var(--gold); color: var(--ink); font-weight: 800; padding: 8px 16px; border-radius: 999px; flex: 0 0 auto; }
 
   /* ---- new round setup sheet ---- */
   .modal {
@@ -343,6 +362,8 @@
 
 <section id="screen-score" class="screen" hidden></section>
 
+<div id="toast" role="status"><span></span><button type="button">Undo</button></div>
+
 <div id="setup" class="modal" hidden>
   <h2>Who's playing?</h2>
   <p class="sub">Four players. Names go on the scorecard.</p>
@@ -365,7 +386,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.24';
+  var VERSION = '0.1.25';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -385,6 +406,7 @@
   // State:
   //   format, keeps : draw piles (card ids, top of pile is the end)
   //   hole          : format card id in play for this hole, or null
+  //   holeCards     : { holeIndex: format card id } so the scorecard can say what each hole was
   //   hand          : power up cards you are holding, { id, played }
   //                   played sticks to the card until it is discarded
   //   view          : what the big card shows
@@ -402,7 +424,7 @@
     return ids;
   }
   function freshState() {
-    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), hole: null, hand: [], view: { type: 'hole' } };
+    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), hole: null, hand: [], view: { type: 'hole' }, holeCards: {} };
   }
   function validIds(list, pile) {
     return Array.isArray(list) && list.every(function (id) { return BY_ID[id] && BY_ID[id].pile === pile; });
@@ -416,6 +438,14 @@
       s.hand = s.hand.map(function (h) { return typeof h === 'string' ? { id: h, played: false } : h; });
       if (!s.hand.every(function (h) { return h && BY_ID[h.id] && BY_ID[h.id].pile === 'keeps'; })) return null;
       if (s.hole && !(BY_ID[s.hole] && BY_ID[s.hole].pile === 'format')) s.hole = null;
+      var hc = {};
+      if (s.holeCards && typeof s.holeCards === 'object') {
+        Object.keys(s.holeCards).forEach(function (k) {
+          var id = s.holeCards[k];
+          if (BY_ID[id] && BY_ID[id].pile === 'format') hc[k] = id;
+        });
+      }
+      s.holeCards = hc;
       if (!s.view || (s.view.type === 'hand' && !(s.view.i >= 0 && s.view.i < s.hand.length))) s.view = { type: 'hole' };
       return s;
     } catch (e) { return null; }
@@ -531,13 +561,29 @@
   }
   window.addEventListener('resize', fitCard);
 
-  function drawFormat() {
+  function drawFormat(silent) {
+    var before = JSON.stringify(state);
+    var replacing = state.hole ? BY_ID[state.hole].title : null;
     if (!state.format.length) state.format = shuffledPile('format');
-    state.hole = state.format.pop();
+    var id = state.format.pop();
+    // Heavy Is The Head cannot be played on hole 1. Slip it back into the pile and draw again.
+    if (score.hole === 0 && id === 'format:heavy-is-the-head' && state.format.length) {
+      state.format.splice(Math.floor(Math.random() * state.format.length), 0, id);
+      id = state.format.pop();
+    }
+    state.hole = id;
+    state.holeCards[score.hole] = id;
     state.view = { type: 'hole' };
     play('draw');
     save();
     render(true);
+    if (replacing && !silent) {
+      toast('Replaced ' + replacing + ' with ' + BY_ID[id].title, function () {
+        state = JSON.parse(before);
+        save();
+        render(false);
+      });
+    }
   }
   function drawPowerUp() {
     if (!state.keeps.length) state.keeps = shuffledPile('keeps');
@@ -565,10 +611,17 @@
   }
   function discardPlayed() {
     if (state.view.type !== 'hand' || !state.hand[state.view.i].played) return;
-    state.hand.splice(state.view.i, 1);
+    var idx = state.view.i;
+    var removed = state.hand.splice(idx, 1)[0];
     state.view = { type: 'hole' };
     save();
     render(true);
+    toast('Discarded ' + BY_ID[removed.id].title, function () {
+      state.hand.splice(Math.min(idx, state.hand.length), 0, removed);
+      state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
+      save();
+      render(true);
+    });
   }
   function newRound() {
     openSetup(score.players);
@@ -587,6 +640,29 @@
   document.getElementById('shuffle').addEventListener('click', newRound);
   document.getElementById('version').textContent = 'v' + VERSION;
   render(false);
+
+  // ---------- Undo toast ----------
+  // One toast at a time, five seconds, with an optional Undo. Used for the taps
+  // that are easy to hit by accident: replacing the hole card, discarding, next hole.
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null, undoFn = null;
+  function toast(msg, fn) {
+    undoFn = fn || null;
+    toastEl.querySelector('span').textContent = msg;
+    toastEl.querySelector('button').hidden = !fn;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 5000);
+  }
+  function hideToast() {
+    toastEl.classList.remove('show');
+    undoFn = null;
+  }
+  toastEl.querySelector('button').addEventListener('click', function () {
+    var f = undoFn;
+    hideToast();
+    if (f) f();
+  });
 
   // ---------- Scorecard ----------
   // Points, not strokes. Most holes hand out 1 to 3 points to one or two
@@ -642,8 +718,14 @@
     var best = Math.max.apply(null, totals);
     var html = '<div class="holehead">' +
       '<button class="step" data-act="hole" data-n="' + (h - 1) + '"' + (h > 0 ? '' : ' disabled') + '>&lsaquo;</button>' +
-      '<div class="hole-title"><strong>HOLE ' + (h + 1) + '</strong>' +
-      '<span>' + (holeTotal(h) ? holeTotal(h) + ' PT' + (holeTotal(h) === 1 ? '' : 'S') + ' AWARDED' : 'NO POINTS YET') + ' &middot; OF ' + HOLES + '</span></div>' +
+      '<div class="hole-title"><strong>HOLE ' + (h + 1) + ' <small style="font-size:.6em;opacity:.7">OF ' + HOLES + '</small></strong>' +
+      '<span>' + (function () {
+        var fc = state.holeCards[h] ? BY_ID[state.holeCards[h]] : null;
+        var t = holeTotal(h);
+        var awarded = t ? t + ' awarded' : 'none awarded yet';
+        return fc ? esc(fc.title) + ' &middot; ' + esc(fc.points) + ' pt' + (String(fc.points) === '1' ? '' : 's') + ' &middot; ' + awarded
+                  : 'No Fore-Mat drawn for this hole';
+      }()) + '</span></div>' +
       '<button class="step" data-act="hole" data-n="' + (h + 1) + '"' + (h < HOLES - 1 ? '' : ' disabled') + '>&rsaquo;</button>' +
       '</div>';
     s.players.forEach(function (name, i) {
@@ -660,7 +742,8 @@
         '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
         '</div></div>';
     });
-    html += '<div class="hint">Points are per hole. Totals run under each name.</div>' +
+    html += '<button class="nexthole" data-act="next"' + (h >= HOLES - 1 ? ' disabled' : '') + '>Next hole &rsaquo;</button>' +
+      '<div class="hint">' + (h >= HOLES - 1 ? 'Last hole.' : 'Moves to hole ' + (h + 2) + ' and draws its Fore-Mat.') + '</div>' +
       '<div class="holestrip" id="holestrip">';
     for (var hc = 0; hc < HOLES; hc++) {
       var t = holeTotal(hc);
@@ -681,6 +764,22 @@
     if (act === 'hole') {
       if (n < 0 || n >= HOLES) return;
       score.hole = n;
+    } else if (act === 'next') {
+      if (score.hole >= HOLES - 1) return;
+      var prevHole = score.hole, before = JSON.stringify(state);
+      score.hole += 1;
+      saveScore();
+      showTab('cards');
+      drawFormat(true);
+      toast('Hole ' + (score.hole + 1) + ': ' + BY_ID[state.hole].title, function () {
+        state = JSON.parse(before);
+        save();
+        render(false);
+        score.hole = prevHole;
+        saveScore();
+        showTab('score');
+      });
+      return;
     } else if (act === 'pt') {
       score.scores[score.hole][i] += n;
     }
