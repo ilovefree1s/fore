@@ -260,7 +260,12 @@
   /* ---- screens and nav ---- */
   .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .screen[hidden] { display: none; }
-  .topdraw { padding: 2px 16px 6px; }
+  .topdraw { padding: 2px 16px 6px; display: flex; gap: 8px; }
+  .topdraw .draw { flex: 1; min-width: 0; }
+  .draw.slim.quiet { background: rgba(255,255,255,.14); color: var(--cream); box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  .draw.slim.quiet.on { background: var(--cream); color: var(--felt-deep); }
+  .fanzone[hidden] { display: none; }
+  .fan { touch-action: none; }
   .draw {
     width: 100%; padding: 16px 12px; border-radius: var(--radius);
     color: #fff; font-weight: 800; font-size: 20px; letter-spacing: .02em;
@@ -272,8 +277,8 @@
   .draw.format { background: var(--format); }
   .draw.keeps { background: var(--keeps); }
   .draw.slim {
-    flex-direction: row; justify-content: center; gap: 10px;
-    padding: 11px 12px; font-size: 16px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3);
+    flex-direction: row; justify-content: center; gap: 8px;
+    padding: 11px 8px; font-size: 15px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3); white-space: nowrap;
   }
   .draw.slim:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
   nav { padding: 8px 16px calc(10px + var(--safe-bottom)); background: rgba(0,0,0,.22); }
@@ -432,6 +437,7 @@
 <section id="screen-cards" class="screen">
   <div class="topdraw">
     <button id="draw-format" class="draw format slim" type="button"><span>Draw Fore-Mat</span><small id="count-format"></small></button>
+    <button id="hide-hand" class="draw slim quiet" type="button"><span>Hide hand</span></button>
   </div>
   <main>
     <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
@@ -498,7 +504,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.61';
+  var VERSION = '0.1.62';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -691,7 +697,7 @@
       b.style.setProperty('--s', i === cur ? 1.05 : 1);
       b.style.zIndex = i === cur ? 50 : 10 + i;
       b.innerHTML = '<div class="k">Power Up</div><div class="t">' + esc(BY_ID[h.id].title) + '</div>';
-      b.addEventListener('click', function () { if (i === cur) lowerToHand(); else raise(i); });
+      b.dataset.i = i;
       fanEl.appendChild(b);
     });
   }
@@ -713,6 +719,59 @@
     }
     body.style.fontSize = size === base ? '' : size + 'px';
   }
+  // Touch a card and slide your thumb along the fan: whichever card is under
+  // it is raised as you go. A plain tap on the card already raised lowers it.
+  var scrub = null;
+  function fanIndexAt(x) {
+    var best = -1, bestD = Infinity;
+    Array.prototype.forEach.call(fanEl.querySelectorAll('.fancard'), function (el) {
+      var r = el.getBoundingClientRect();
+      var d = Math.abs((r.left + r.right) / 2 - x);
+      if (d < bestD) { bestD = d; best = Number(el.dataset.i); }
+    });
+    return best;
+  }
+  fanEl.addEventListener('pointerdown', function (e) {
+    var card = e.target.closest('.fancard');
+    if (!card) return;
+    var i = Number(card.dataset.i);
+    var cur = state.view.type === 'hand' ? state.view.i : -1;
+    scrub = { start: cur, last: i, moved: false };
+    try { fanEl.setPointerCapture(e.pointerId); } catch (err) {}
+    if (i !== cur) raise(i);
+  });
+  fanEl.addEventListener('pointermove', function (e) {
+    if (!scrub) return;
+    var j = fanIndexAt(e.clientX);
+    if (j < 0 || j === scrub.last) return;
+    scrub.moved = true;
+    scrub.last = j;
+    raise(j);
+  });
+  function endScrub() {
+    if (!scrub) return;
+    var s = scrub;
+    scrub = null;
+    if (!s.moved && s.last === s.start) lowerToHand();
+  }
+  fanEl.addEventListener('pointerup', endScrub);
+  fanEl.addEventListener('pointercancel', endScrub);
+
+  // Hide hand: collapses the fan and lowers any raised card, so the phone
+  // can be passed around without showing your cards. Show hand brings it back.
+  var handHidden = false;
+  function renderHideHand() {
+    var b = document.getElementById('hide-hand');
+    b.querySelector('span').textContent = handHidden ? 'Show hand' : 'Hide hand';
+    b.classList.toggle('on', handHidden);
+    document.querySelector('.fanzone').hidden = handHidden;
+  }
+  document.getElementById('hide-hand').addEventListener('click', function () {
+    handHidden = !handHidden;
+    if (handHidden && state.view.type === 'hand') { state.view = { type: 'hole' }; save(); }
+    renderHideHand();
+    render(false);
+  });
   function render(animate, popIndex) {
     document.getElementById('count-format').textContent = state.format.length + ' left';
     renderStage(animate);
@@ -748,6 +807,7 @@
     render(true);
   }
   function drawPowerUp() {
+    if (handHidden) { handHidden = false; renderHideHand(); }
     if (!state.keeps.length) state.keeps = shuffledPile('keeps');
     state.hand.push({ id: state.keeps.pop(), played: false });
     state.view = { type: 'hand', i: state.hand.length - 1 };
