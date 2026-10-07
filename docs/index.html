@@ -84,8 +84,8 @@
   .stage .card.keeps { touch-action: none; cursor: grab; }
   .card.dragging { transition: none !important; animation: none !important; cursor: grabbing; }
   .card.settle { transition: transform .22s cubic-bezier(.2,.9,.3,1.2), opacity .22s; }
-  .swipehint { font-size: 11px; opacity: .75; letter-spacing: .02em; min-height: 16px; margin-top: -2px; }
-  .swipehint[hidden] { visibility: hidden; display: block; }
+  .swipehint { font-size: 11px; opacity: .8; letter-spacing: .02em; flex: 1; min-width: 0; }
+  .swipehint[hidden] { display: none; }
   @keyframes raise {
     from { transform: translateY(160px) scale(.45); opacity: .4; }
     to   { transform: none; opacity: 1; }
@@ -196,7 +196,13 @@
   .card .foot { margin-top: auto; font-size: 3.33cqw; color: var(--muted); }
   @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
 
-  .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 48px; }
+  .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 40px; align-items: center; justify-content: space-between; }
+  .pill {
+    flex: 0 0 auto; padding: 9px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,.14); color: var(--cream);
+  }
+  .pill[hidden] { display: none; }
+  .pill:active { background: rgba(255,255,255,.26); }
   .act {
     flex: 1; padding: 13px 12px; border-radius: 14px; font-weight: 800; font-size: 17px;
     background: rgba(255,255,255,.14); color: var(--cream);
@@ -242,20 +248,6 @@
     position: absolute; left: 0; right: 0; bottom: 34px; text-align: center;
     font-size: 12px; opacity: .6; padding: 0 10px;
   }
-  .deck {
-    flex: 0 0 auto; width: 78px; height: 110px; border-radius: 10px; color: #fff; margin-bottom: 4px;
-    background:
-      radial-gradient(circle at 50% 42%, rgba(255,255,255,.18), transparent 46%),
-      repeating-linear-gradient(135deg, #2a5fb3 0 6px, #1d4382 6px 12px);
-    box-shadow: 0 3px 0 #16336a, 0 6px 0 #10264f, 0 10px 18px rgba(0,0,0,.45);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-    border: 2px solid rgba(255,255,255,.25);
-  }
-  .deck:active { transform: translateY(4px); box-shadow: 0 1px 0 #16336a, 0 2px 0 #10264f, 0 6px 12px rgba(0,0,0,.45); }
-  .deck span { font-size: 10px; letter-spacing: .18em; font-weight: 800; opacity: .9; }
-  .deck b { font-size: 13px; font-weight: 900; line-height: 1.05; text-align: center; }
-  .deck small { font-size: 10px; font-weight: 700; opacity: .85; margin-top: 3px; }
-
   /* ---- screens and nav ---- */
   .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .screen[hidden] { display: none; }
@@ -282,6 +274,11 @@
     background: rgba(255,255,255,.1); color: var(--cream);
   }
   nav .tabs button.on { background: var(--cream); color: var(--felt-deep); }
+  nav .tabs button.draw { background: var(--keeps); color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+  nav .tabs button.play { background: var(--gold); color: var(--ink); box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+  nav .tabs button.danger { background: var(--format); color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+  nav .tabs button.draw:active, nav .tabs button.play:active, nav .tabs button.danger:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  nav .tabs button small { display: block; font-size: 11px; font-weight: 600; opacity: .85; margin-top: 1px; }
   .status { margin-top: 6px; text-align: center; font-size: 11px; opacity: .75; }
 
   /* ---- scorecard ---- */
@@ -409,12 +406,13 @@
   </div>
   <main>
     <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
-    <div id="actions" class="actions"></div>
-    <div id="swipehint" class="swipehint" hidden>&#8595; Swipe the card down to lower it into your hand</div>
+    <div id="actions" class="actions">
+      <span id="swipehint" class="swipehint" hidden>&#8595; Swipe down to lower it into your hand</span>
+      <button id="putback" class="pill" type="button" hidden>Put back on deck</button>
+    </div>
   </main>
   <div class="fanzone">
     <div id="fan" class="fan"></div>
-    <button id="draw-keeps" class="deck" type="button"><span>Draw</span><b>Power Up</b><small id="count-keeps"></small></button>
   </div>
 </section>
 
@@ -459,7 +457,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.37';
+  var VERSION = '0.1.38';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -599,16 +597,29 @@
     }
   }
   function renderActions() {
-    actionsEl.innerHTML = '';
-    document.getElementById('swipehint').hidden = state.view.type !== 'hand';
-    if (state.view.type !== 'hand') return;
-    var h = state.hand[state.view.i];
-    if (!h) return;
-    if (h.played) {
-      actionsEl.appendChild(button('danger', 'Discard', discardPlayed));
+    var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
+    document.getElementById('swipehint').hidden = !raised;
+    document.getElementById('putback').hidden = !(raised && !raised.played);
+  }
+  // The bottom-left button is whatever you would do next on this screen:
+  // draw when nothing is raised, Play or Discard for the raised card, and
+  // Cards when you are on the scorecard.
+  function renderNav() {
+    var b = document.getElementById('tab-cards');
+    var onScore = scoreEl && !scoreEl.hidden;
+    var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
+    b.className = '';
+    if (onScore) {
+      b.textContent = 'Cards';
+    } else if (raised && raised.played) {
+      b.className = 'danger';
+      b.textContent = 'Discard';
+    } else if (raised) {
+      b.className = 'play';
+      b.textContent = 'Play';
     } else {
-      actionsEl.appendChild(button('', 'Put back', putBack));
-      actionsEl.appendChild(button('primary', 'Play', playCard));
+      b.className = 'draw';
+      b.innerHTML = 'Draw Power Up<small>' + state.keeps.length + ' left</small>';
     }
   }
   // The fan: every hand card along the bottom in an arc, overlapping more as
@@ -645,19 +656,18 @@
     });
   }
   function render(animate, popIndex) {
-    PILES.forEach(function (p) {
-      document.getElementById('count-' + p).textContent = state[p].length + ' left';
-    });
+    document.getElementById('count-format').textContent = state.format.length + ' left';
     renderStage(animate);
     renderActions();
     renderFan(popIndex);
+    renderNav();
     fitCard();
   }
   // The stage card is as big as the room between the top bar and the fan
   // allows, at 5:7, capped at 360px wide. The action row always reserves
   // its height so the card does not jump when one is raised.
   function fitCard() {
-    var avail = mainEl.clientHeight - 8 - 48 - 10 - 18;
+    var avail = mainEl.clientHeight - 8 - 40 - 10;
     var w = Math.min(360, mainEl.clientWidth - 32, Math.floor(avail * 5 / 7));
     if (w > 0) mainEl.style.setProperty('--cardw', w + 'px');
   }
@@ -787,7 +797,7 @@
   document.getElementById('draw-format').addEventListener('click', function () {
     if (settings.drawer) drawFormat(); else openBrowse();
   });
-  document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
+  document.getElementById('putback').addEventListener('click', putBack);
   document.getElementById('shuffle').addEventListener('click', newRound);
   document.getElementById('version').textContent = 'v' + VERSION;
   render(false);
@@ -1034,13 +1044,19 @@
     var cards = name !== 'score';
     document.getElementById('screen-cards').hidden = !cards;
     scoreEl.hidden = cards;
-    document.getElementById('tab-cards').classList.toggle('on', cards);
     document.querySelector('header').hidden = cards;
     document.getElementById('tab-score').classList.toggle('on', !cards);
     if (!cards) renderScore(); else { fitCard(); renderFan(); }
+    renderNav();
     try { localStorage.setItem(TAB_KEY, cards ? 'cards' : 'score'); } catch (e) {}
   }
-  document.getElementById('tab-cards').addEventListener('click', function () { showTab('cards'); });
+  document.getElementById('tab-cards').addEventListener('click', function () {
+    if (!scoreEl.hidden) { showTab('cards'); return; }
+    var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
+    if (raised && raised.played) discardPlayed();
+    else if (raised) playCard();
+    else drawPowerUp();
+  });
   document.getElementById('tab-score').addEventListener('click', function () { showTab('score'); });
   var savedTab = null;
   try { savedTab = localStorage.getItem(TAB_KEY); } catch (e) {}
