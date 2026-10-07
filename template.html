@@ -307,7 +307,11 @@
   .player .grow { flex: 1; min-width: 0; }
   .player .name { font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .player .sub { font-size: 13px; opacity: .9; margin-top: 3px; display: flex; gap: 8px; align-items: center; }
-  .lead-tag { background: var(--gold); color: var(--ink); font-size: 9px; font-weight: 900; letter-spacing: .12em; padding: 2px 6px; border-radius: 4px; }
+  .place {
+    background: rgba(255,255,255,.18); color: var(--cream); font-size: 11px; font-weight: 900; letter-spacing: .08em;
+    padding: 2px 7px; border-radius: 5px; text-transform: uppercase;
+  }
+  .place.first { background: var(--gold); color: var(--ink); }
   .steps { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
   .steps .num { width: 40px; text-align: center; font-size: 24px; font-weight: 900; }
   .steps .num.zero { opacity: .35; }
@@ -911,6 +915,18 @@
     var s = score, h = s.hole;
     var totals = s.players.map(function (_, i) { return totalFor(i); });
     var best = Math.max.apply(null, totals);
+    // Standings: 1st is the highest total, ties share a place with a T.
+    var scored = totals.some(function (v) { return v !== 0; });
+    function placeTag(i) {
+      if (!scored) return '';
+      var rank = 1, tied = 0;
+      totals.forEach(function (v, j) {
+        if (v > totals[i]) rank++;
+        else if (v === totals[i] && j !== i) tied++;
+      });
+      var ord = rank === 1 ? 'st' : rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th';
+      return '<span class="place' + (rank === 1 ? ' first' : '') + '">' + (tied ? 'T' : '') + rank + ord + '</span>';
+    }
     var html = '<div class="holehead">' +
       '<button class="step" data-act="hole" data-n="' + (h - 1) + '"' + (h > 0 ? '' : ' disabled') + '>&lsaquo;</button>' +
       '<div class="hole-title"><strong>HOLE ' + (h + 1) + ' <small style="font-size:.6em;opacity:.7">OF ' + HOLES + '</small></strong>' +
@@ -929,7 +945,7 @@
       html += '<div class="player' + (lead ? ' lead' : '') + '">' +
         '<div class="grow">' +
         '<div class="name">' + esc(name) + '</div>' +
-        '<div class="sub">' + (lead ? '<span class="lead-tag">LEAD</span>' : '') +
+        '<div class="sub">' + placeTag(i) +
         '<span>' + totals[i] + ' total</span></div></div>' +
         '<div class="steps">' +
         '<button class="step minus" data-act="pt" data-i="' + i + '" data-n="-1">&minus;</button>' +
