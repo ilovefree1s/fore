@@ -470,7 +470,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.39';
+  var VERSION = '0.1.40';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -793,7 +793,6 @@
     state.view = { type: 'hole' };
     save();
     render(false);
-    toast('Discarded ' + BY_ID[removed.id].title);
   }
   function newRound() {
     openSetup(score.players);
