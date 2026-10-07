@@ -740,13 +740,6 @@
     state.view = { type: 'hole' };
     save();
     render(false);
-    toast('Put ' + BY_ID[h.id].title + ' back on the deck', function () {
-      if (state.keeps[state.keeps.length - 1] === h.id) state.keeps.pop();
-      state.hand.splice(Math.min(idx, state.hand.length), 0, h);
-      state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
-      save();
-      render('raise');
-    });
   }
   // Hold the raised card and swipe it down toward the fan to lower it.
   var drag = null;
