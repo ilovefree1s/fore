@@ -321,6 +321,27 @@
     border-radius: 12px; border: 0; background: var(--cream); color: var(--ink);
   }
   .namerow input::placeholder { color: #a8a497; font-weight: 600; }
+  .namerow .tag {
+    flex: 0 0 auto; width: 48px; text-align: center; font-size: 10px; font-weight: 900; letter-spacing: .14em;
+    color: var(--gold);
+  }
+  .namerow.other .tag { color: var(--cream); opacity: .5; }
+  .modal h3 { margin: 22px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+  .seg { display: flex; gap: 6px; background: rgba(255,255,255,.1); padding: 4px; border-radius: 14px; }
+  .seg button { flex: 1; padding: 11px; border-radius: 11px; background: transparent; color: var(--cream); font-weight: 800; font-size: 15px; }
+  .seg button.on { background: var(--cream); color: var(--felt-deep); }
+  .modal .why { font-size: 12px; opacity: .7; margin: 8px 2px 0; line-height: 1.4; }
+
+  /* ---- pick a Fore-Mat (phones that do not draw) ---- */
+  .picklist { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .pick {
+    display: flex; align-items: center; gap: 12px; text-align: left;
+    padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,.1); color: var(--cream);
+  }
+  .pick.on { background: var(--cream); color: var(--felt-deep); }
+  .pick .t { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; }
+  .pick .t small { display: block; font-weight: 600; font-size: 11px; opacity: .7; letter-spacing: .06em; text-transform: uppercase; }
+  .pick .p { flex: 0 0 auto; background: var(--format); color: #fff; font-weight: 900; font-size: 13px; padding: 4px 9px; border-radius: 999px; }
   .modal .spacer { flex: 1; min-height: 16px; }
   .modal .go { padding: 16px; border-radius: 14px; background: var(--gold); color: var(--ink); font-weight: 900; font-size: 18px; }
   .modal .cancel { margin-top: 8px; padding: 12px; border-radius: 12px; background: transparent; color: var(--cream); font-weight: 700; opacity: .8; }
@@ -366,12 +387,25 @@
 
 <div id="setup" class="modal" hidden>
   <h2>Who's playing?</h2>
-  <p class="sub">Four players. Names go on the scorecard.</p>
+  <p class="sub">You plus three. Your name is remembered for next time.</p>
   <div id="names" class="names"></div>
+  <h3>Who draws the Fore-Mats?</h3>
+  <div class="seg">
+    <button id="drawer-me" type="button">Me</button>
+    <button id="drawer-other" type="button">Someone else</button>
+  </div>
+  <p class="why">There are only 20 Fore-Mats, so one phone should draw them for the group. If someone else draws, this phone gets a Set Fore-Mat button instead, so the hole's card still shows here and on the scorecard.</p>
   <div class="spacer"></div>
   <button id="setup-go" class="go" type="button">Start round</button>
   <button id="setup-cancel" class="cancel" type="button">Cancel</button>
   <p class="note">Starting reshuffles both piles, clears your hand, and clears the scorecard.</p>
+</div>
+
+<div id="pick" class="modal" hidden>
+  <h2>Which Fore-Mat?</h2>
+  <p class="sub">Pick the card the drawer announced for this hole.</p>
+  <div id="picklist" class="picklist"></div>
+  <button id="pick-cancel" class="cancel" type="button">Cancel</button>
 </div>
 
 <nav>
@@ -635,7 +669,9 @@
     renderScore();
     showTab('cards');
   }
-  document.getElementById('draw-format').addEventListener('click', drawFormat);
+  document.getElementById('draw-format').addEventListener('click', function () {
+    if (settings.drawer) drawFormat(); else openPick();
+  });
   document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
   document.getElementById('shuffle').addEventListener('click', newRound);
   document.getElementById('version').textContent = 'v' + VERSION;
@@ -774,6 +810,53 @@
     renderScore();
   });
 
+  // ---------- Settings: who you are, who draws ----------
+  var SETTINGS_KEY = 'fore.settings.v1';
+  var settings = { me: '', drawer: true };
+  try {
+    var ss = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if (ss && typeof ss === 'object') {
+      if (typeof ss.me === 'string') settings.me = ss.me;
+      if (typeof ss.drawer === 'boolean') settings.drawer = ss.drawer;
+    }
+  } catch (e) {}
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+  }
+  // The top bar is Draw Fore-Mat on the drawer's phone and Set Fore-Mat everywhere else.
+  function applyDrawer() {
+    var b = document.getElementById('draw-format');
+    b.querySelector('span').textContent = settings.drawer ? 'Draw Fore-Mat' : 'Set Fore-Mat';
+    document.getElementById('count-format').hidden = !settings.drawer;
+  }
+
+  // ---------- Pick a Fore-Mat (non-drawer phones) ----------
+  var pickEl = document.getElementById('pick');
+  var pickListEl = document.getElementById('picklist');
+  function openPick() {
+    pickListEl.innerHTML = '';
+    CARDS.filter(function (c) { return c.pile === 'format'; }).forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pick' + (state.hole === c.id ? ' on' : '');
+      b.innerHTML = '<div class="t">' + esc(c.title) + (c.format ? '<small>' + esc(c.format) + '</small>' : '') + '</div>' +
+        '<div class="p">' + esc(c.points) + ' pt' + (String(c.points) === '1' ? '' : 's') + '</div>';
+      b.addEventListener('click', function () { setFormat(c.id); pickEl.hidden = true; });
+      pickListEl.appendChild(b);
+    });
+    pickEl.hidden = false;
+    pickEl.scrollTop = 0;
+  }
+  function setFormat(id) {
+    state.hole = id;
+    state.holeCards[score.hole] = id;
+    state.view = { type: 'hole' };
+    play('draw');
+    save();
+    render(true);
+  }
+  document.getElementById('pick-cancel').addEventListener('click', function () { pickEl.hidden = true; });
+
   // ---------- New round setup ----------
   var setupEl = document.getElementById('setup');
   var namesEl = document.getElementById('names');
@@ -782,11 +865,15 @@
     namesEl.innerHTML = '';
     setupNames.forEach(function (n, i) {
       var row = document.createElement('div');
-      row.className = 'namerow';
+      row.className = 'namerow' + (i ? ' other' : '');
+      var tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.textContent = i ? 'P' + (i + 1) : 'YOU';
+      row.appendChild(tag);
       var input = document.createElement('input');
       input.type = 'text';
       input.value = n;
-      input.placeholder = 'Player ' + (i + 1);
+      input.placeholder = i ? 'Player ' + (i + 1) : 'Your name';
       input.autocapitalize = 'words';
       input.autocomplete = 'off';
       input.enterKeyHint = i === setupNames.length - 1 ? 'done' : 'next';
@@ -802,19 +889,39 @@
     });
   }
   function openSetup(names) {
-    setupNames = ['', '', '', ''].map(function (_, i) { return names && names[i] ? String(names[i]) : ''; });
+    // Row 1 is always you, from settings. Rows 2-4 come from the last round.
+    setupNames = ['', '', '', ''].map(function (_, i) {
+      if (i === 0) return settings.me || '';
+      return names && names[i] ? String(names[i]) : '';
+    });
+    drawerBefore = settings.drawer;
     renderSetup();
+    renderDrawer();
     setupEl.hidden = false;
     var first = namesEl.querySelector('input');
     if (first && !first.value) first.focus();
   }
+  function renderDrawer() {
+    document.getElementById('drawer-me').classList.toggle('on', settings.drawer);
+    document.getElementById('drawer-other').classList.toggle('on', !settings.drawer);
+  }
+  document.getElementById('drawer-me').addEventListener('click', function () { settings.drawer = true; renderDrawer(); });
+  document.getElementById('drawer-other').addEventListener('click', function () { settings.drawer = false; renderDrawer(); });
   function closeSetup() { setupEl.hidden = true; }
-  document.getElementById('setup-cancel').addEventListener('click', closeSetup);
+  var drawerBefore = settings.drawer;
+  document.getElementById('setup-cancel').addEventListener('click', function () {
+    settings.drawer = drawerBefore; // a toggle flipped then cancelled does not stick
+    closeSetup();
+  });
   document.getElementById('setup-go').addEventListener('click', function () {
-    var names = setupNames.map(function (n, i) { return n.trim() || ('Player ' + (i + 1)); });
+    var names = setupNames.map(function (n, i) { return n.trim() || (i ? 'Player ' + (i + 1) : 'Me'); });
+    settings.me = names[0];
+    saveSettings();
+    applyDrawer();
     closeSetup();
     startRound(names);
   });
+  applyDrawer();
 
   // ---------- Tabs ----------
   var TAB_KEY = 'fore.tab';
