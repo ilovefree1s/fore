@@ -65,10 +65,8 @@
   header[hidden] { display: none; }
   /* The cards screen has no header, so it carries the notch padding itself. */
   #screen-cards { padding-top: calc(10px + var(--safe-top)); }
-  header h1 {
-    margin: 0; font-size: 26px; letter-spacing: 0.18em; font-weight: 800;
-    text-shadow: 0 2px 0 rgba(0,0,0,.25);
-  }
+  #fs-toggle[hidden] { display: none; }
+  #fs-toggle.on { background: var(--cream); color: var(--felt-deep); }
   .tools { display: flex; gap: 8px; }
   .tool {
     background: rgba(255,255,255,.12); color: var(--cream);
@@ -77,15 +75,7 @@
   .tool:active { background: rgba(255,255,255,.25); }
   #install { display: none; }
   #install.show { display: inline-block; }
-  .setting {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    margin: 14px 0 4px; padding: 10px 12px 10px 14px; border-radius: 14px; background: rgba(255,255,255,.08);
-  }
-  .setting[hidden] { display: none; }
-  .setting .lbl { font-weight: 800; font-size: 15px; }
-  .setting .lbl small { display: block; font-weight: 600; font-size: 11px; opacity: .7; margin-top: 2px; }
-  .setting .seg { flex: 0 0 auto; width: 150px; }
-  .setting .seg button { padding: 8px; font-size: 14px; }
+
 
   main {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -419,7 +409,7 @@
 </div>
 
 <header>
-  <h1>FORE</h1>
+  <button id="fs-toggle" class="tool" type="button" hidden>Full screen: Off</button>
   <div class="tools">
     <button id="install" class="tool" type="button">Install</button>
     <button id="shuffle" class="tool" type="button">New Round</button>
@@ -940,12 +930,6 @@
         '<strong>' + (hc + 1) + '</strong><span>' + (t ? t + ' pt' + (t === 1 ? '' : 's') : '&ndash;') + '</span></button>';
     }
     html += '</div>';
-    if (typeof fsSupported !== 'undefined' && fsSupported) {
-      var fsOn = !!document.fullscreenElement;
-      html += '<div class="setting"><div class="lbl">Full screen<small>Hides the phone’s status and navigation bars</small></div>' +
-        '<div class="seg"><button data-act="fs" data-n="1"' + (fsOn ? ' class="on"' : '') + '>On</button>' +
-        '<button data-act="fs" data-n="0"' + (fsOn ? '' : ' class="on"') + '>Off</button></div></div>';
-    }
     scoreEl.innerHTML = html;
     var on = scoreEl.querySelector('.holechip.on');
     if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
@@ -962,9 +946,6 @@
     } else if (act === 'next') {
       if (score.hole >= HOLES - 1) return;
       score.hole += 1;
-    } else if (act === 'fs') {
-      setFullscreen(n === 1);
-      return;
     } else if (act === 'pt') {
       score.scores[score.hole][i] += n;
     }
@@ -1020,13 +1001,21 @@
     var p = document.documentElement.requestFullscreen({ navigationUI: 'hide' });
     if (p && p.catch) p.catch(function () {});
   }
+  var fsToggle = document.getElementById('fs-toggle');
+  function renderFsToggle() {
+    if (!fsSupported) return;
+    fsToggle.hidden = false;
+    var on = !!document.fullscreenElement;
+    fsToggle.classList.toggle('on', on);
+    fsToggle.textContent = 'Full screen: ' + (on ? 'On' : 'Off');
+  }
   function setFullscreen(on) {
     settings.fullscreen = on;
     fsArmed = on;
     saveSettings();
     if (on && !document.fullscreenElement) enterFullscreen();
     if (!on && document.fullscreenElement) document.exitFullscreen().catch(function () {});
-    if (!scoreEl.hidden) renderScore();
+    renderFsToggle();
   }
   if (fsSupported) {
     document.addEventListener('pointerdown', function () {
@@ -1038,9 +1027,13 @@
       fitCard();
       fitText();
       renderFan();
-      if (!scoreEl.hidden) renderScore();
+      renderFsToggle();
     });
-    if (!scoreEl.hidden) renderScore();
+    fsToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setFullscreen(!document.fullscreenElement);
+    });
+    renderFsToggle();
   }
 
   // ---------- New round setup ----------
