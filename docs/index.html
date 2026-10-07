@@ -29,7 +29,11 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; }
+  /* iOS standalone can leave a strip below the layout; paint it felt and
+     size the body to the real viewport so the layout reaches the bottom. */
+  html { background: var(--felt-deep); }
   html, body { margin: 0; height: 100%; }
+  body { height: 100vh; height: 100dvh; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: radial-gradient(circle at 50% 20%, var(--felt-light), var(--felt) 55%, var(--felt-deep));
@@ -480,7 +484,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.55';
+  var VERSION = '0.1.56';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
