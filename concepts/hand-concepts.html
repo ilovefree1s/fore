@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FORE hand concepts</title>
+<style>
+  body { margin: 0; background: #161616; color: #eee; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .lead { opacity: .7; margin: 0 0 28px; font-size: 14px; max-width: 720px; line-height: 1.5; }
+  section { margin-bottom: 44px; }
+  section h2 { font-size: 16px; margin: 0 0 2px; }
+  section h2 span { opacity: .5; font-weight: 500; margin-left: 10px; font-size: 13px; }
+  section p { font-size: 13px; opacity: .7; margin: 0 0 14px; max-width: 640px; line-height: 1.5; }
+  .row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* phone frame */
+  .phone {
+    width: 320px; height: 660px; border-radius: 34px; background: #0c3a1d; position: relative; overflow: hidden;
+    box-shadow: 0 0 0 8px #222, 0 20px 50px rgba(0,0,0,.6);
+    background: radial-gradient(circle at 50% 20%, #1f6b3a, #14512b 55%, #0c3a1d);
+    color: #f7f2e4; font-size: 12px;
+  }
+  .phone * { box-sizing: border-box; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 22px 16px 4px; }
+  .top b { letter-spacing: .18em; font-size: 20px; }
+  .top i { font-style: normal; background: rgba(255,255,255,.12); padding: 6px 12px; border-radius: 999px; font-size: 11px; }
+  .bar { margin: 4px 16px; padding: 9px; border-radius: 12px; background: #c8541f; text-align: center; font-weight: 800; font-size: 13px; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
+  .nav { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 16px 18px; background: rgba(0,0,0,.22); display: flex; gap: 8px; z-index: 5; }
+  .nav div { flex: 1; padding: 9px; border-radius: 10px; background: rgba(255,255,255,.1); text-align: center; font-weight: 800; font-size: 12px; }
+  .nav div.on { background: #f7f2e4; color: #0c3a1d; }
+  .pu { margin: 0 16px; padding: 10px; border-radius: 14px; background: #2a5fb3; text-align: center; font-weight: 800; font-size: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+
+  /* card look, scaled */
+  .c {
+    --accent: #c8541f; --dark: #8f3a13; --pa: #fbf7ea; --pb: #efe6cc;
+    position: relative; border-radius: 10px; border: 1px solid rgba(0,0,0,.25); color: #1c1b17; overflow: hidden;
+    background: repeating-linear-gradient(135deg, var(--accent) 0 6px, var(--dark) 6px 12px) top / 100% 7px no-repeat,
+                repeating-linear-gradient(135deg, var(--accent) 0 6px, var(--dark) 6px 12px) bottom / 100% 7px no-repeat,
+                linear-gradient(165deg, var(--pa), var(--pb));
+    box-shadow: 0 10px 24px rgba(0,0,0,.45);
+    padding: 16px 12px 14px; display: flex; flex-direction: column;
+  }
+  .c.b { --accent: #2a5fb3; --dark: #1d4382; --pa: #f5f8fd; --pb: #e2eaf6; }
+  .c .k { font-size: 7px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  .c h4 { margin: 4px 0 6px; font-size: 17px; line-height: 1.05; }
+  .c h4::after { content: ''; display: block; width: 26px; height: 3px; background: var(--accent); margin-top: 5px; border-radius: 2px; }
+  .c .t { font-size: 9.5px; line-height: 1.35; }
+  .c .pts { position: absolute; top: 14px; right: 10px; width: 28px; height: 28px; border-radius: 50%; background: #c8541f; color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; transform: rotate(8deg); box-shadow: 0 0 0 2px var(--pa), 0 0 0 3px #c8541f; }
+  .c.played::after { content: 'PLAYED'; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(-18deg); border: 3px solid #c8541f; color: #c8541f; font-weight: 900; font-size: 18px; padding: 3px 10px; border-radius: 6px; background: rgba(251,247,234,.7); letter-spacing: .1em; }
+  .big { width: 230px; height: 322px; }
+  .med { width: 150px; height: 210px; }
+  .sm { width: 92px; height: 129px; padding: 12px 8px 8px; }
+  .sm h4 { font-size: 11px; } .sm .t { display: none; } .sm .pts { width: 20px; height: 20px; font-size: 9px; top: 10px; right: 7px; }
+  .xs { width: 62px; height: 86px; padding: 11px 6px 6px; border-radius: 7px; }
+  .xs h4 { font-size: 9.5px; margin: 3px 0 0; } .xs h4::after { display: none; } .xs .t, .xs .pts { display: none; } .xs .k { font-size: 6px; }
+  .act { position: absolute; left: 16px; right: 16px; display: flex; gap: 8px; }
+  .act div { flex: 1; padding: 10px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 13px; background: rgba(255,255,255,.14); }
+  .act .p { background: #e0b94a; color: #1c1b17; }
+  .act .d { background: #c8541f; }
+  .label { position: absolute; left: 0; right: 0; text-align: center; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; font-weight: 800; }
+  .glow { box-shadow: 0 0 0 3px #e0b94a, 0 12px 24px rgba(0,0,0,.5); }
+</style>
+</head>
+<body>
+<h1>FORE hand concepts</h1>
+<p class="lead">Six ways to hold and look at your cards on a phone. Every one keeps the same card face. The question is just how the hand lives on screen: how you flip through it, how you see what you've got, and how you play one. Tap targets are drawn at real size.</p>
+
+<section>
+  <h2>1. Arena fan <span>MTG Arena style: hand fanned along the bottom, one card raised</span></h2>
+  <p>The hole card sits up top, smaller. Your hand is a fan of real cards along the bottom edge, overlapping like you're holding them. Tap one and it lifts out of the fan and grows to full size in the middle with Play under it. Drag up to play, like Arena. The fan compresses as the hand grows.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c med" style="position:absolute;left:85px;top:98px"><div class="k">Fore-Mat · this hole</div><div class="pts">1-3</div><h4>Wolf!</h4><div class="t">The card player is the Wolf. Everyone hits their tee shot, then the Wolf decides…</div></div>
+      <div class="label" style="top:330px">Your hand · 5</div>
+      <!-- fan along the bottom -->
+      <div class="c b sm" style="position:absolute;left:12px;bottom:92px;transform:rotate(-16deg) translateY(22px)"><div class="k">Power Up</div><h4>Mulligan!</h4></div>
+      <div class="c b sm" style="position:absolute;left:62px;bottom:98px;transform:rotate(-8deg) translateY(8px)"><div class="k">Power Up</div><h4>Foot Wedge!</h4></div>
+      <div class="c b sm glow" style="position:absolute;left:114px;bottom:120px;transform:translateY(-10px);z-index:2"><div class="k">Power Up</div><h4>Air Horn!</h4></div>
+      <div class="c b sm played" style="position:absolute;left:166px;bottom:98px;transform:rotate(8deg) translateY(8px)"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+      <div class="c b sm" style="position:absolute;left:216px;bottom:92px;transform:rotate(16deg) translateY(22px)"><div class="k">Power Up</div><h4>Tee Up!</h4></div>
+      <div class="act" style="bottom:66px;left:100px;right:100px"><div class="p">Play</div></div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="label" style="top:72px">Air Horn! · raised from the fan</div>
+      <div class="c b big" style="position:absolute;left:45px;top:92px"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div><div class="t" style="margin-top:auto;opacity:.6">One use. Play it when you want it.</div></div>
+      <div class="act" style="top:426px"><div>Put back</div><div class="p">Play</div></div>
+      <div class="c sm" style="position:absolute;left:22px;bottom:84px;transform:rotate(-14deg) translateY(16px);opacity:.6"><div class="k">Fore-Mat</div><h4>Wolf!</h4></div>
+      <div class="c b sm" style="position:absolute;left:72px;bottom:90px;transform:rotate(-6deg) translateY(4px);opacity:.6"><div class="k">Power Up</div><h4>Mulligan!</h4></div>
+      <div class="c b sm" style="position:absolute;left:124px;bottom:92px;transform:rotate(2deg);opacity:.6"><div class="k">Power Up</div><h4>Foot Wedge!</h4></div>
+      <div class="c b sm played" style="position:absolute;left:176px;bottom:88px;transform:rotate(10deg) translateY(8px);opacity:.6"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>2. Swipe deck + mini fan <span>full-size cards you swipe through, a fan of minis as the index</span></h2>
+  <p>Every card is full size, one at a time, and you swipe sideways through them like photos: hole card first, then your hand in order. Under it, a fan of mini cards shows the whole hand at a glance and the one in view lifts out. Tap a mini to jump. Drawing slides the new card in from the right. This one is already built and ready to turn on.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c big" style="position:absolute;left:-150px;top:92px;opacity:.5"><div class="k">Fore-Mat</div><h4>Wolf!</h4></div>
+      <div class="c b big" style="position:absolute;left:45px;top:92px"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div><div class="t" style="margin-top:auto;opacity:.6">One use. Play it when you want it.</div></div>
+      <div class="c b big" style="position:absolute;left:290px;top:92px;opacity:.5"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+      <div class="act" style="top:426px;left:45px;right:45px"><div class="p">Play</div></div>
+      <div class="c xs" style="position:absolute;left:52px;bottom:94px;transform:rotate(-7deg) translateY(6px)"><div class="k">Fore-Mat</div><h4>Wolf!</h4></div>
+      <div class="c b xs" style="position:absolute;left:106px;bottom:96px;transform:rotate(-3.5deg) translateY(2px)"><div class="k">Power Up</div><h4>Mulligan!</h4></div>
+      <div class="c b xs glow" style="position:absolute;left:160px;bottom:110px;z-index:2"><div class="k">Power Up</div><h4>Air Horn!</h4></div>
+      <div class="c b xs played" style="position:absolute;left:214px;bottom:96px;transform:rotate(3.5deg) translateY(2px)"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+      <div class="pu" style="position:absolute;left:0;right:0;bottom:66px;margin:0 16px">Draw Power Up · 26 left</div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3. Cover flow <span>center card big, neighbors tilted back on each side</span></h2>
+  <p>Same swipe as the deck, but the cards on either side stay visible, turned away in 3D like an old iPod cover flow. You always see what's next to the card you're on, so a five-card hand reads as a row without a separate index. Swipe or tap a neighbor to bring it forward.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div style="position:absolute;left:0;right:0;top:120px;height:300px;perspective:700px">
+        <div class="c b med" style="position:absolute;left:-30px;top:50px;transform:rotateY(55deg) scale(.9);opacity:.75"><div class="k">Power Up</div><h4>Mulligan!</h4></div>
+        <div class="c b med" style="position:absolute;left:30px;top:40px;transform:rotateY(45deg) scale(.95);opacity:.85"><div class="k">Power Up</div><h4>Foot Wedge!</h4></div>
+        <div class="c b med played" style="position:absolute;right:30px;top:40px;transform:rotateY(-45deg) scale(.95);opacity:.85"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+        <div class="c b med" style="position:absolute;right:-30px;top:50px;transform:rotateY(-55deg) scale(.9);opacity:.75"><div class="k">Power Up</div><h4>Tee Up!</h4></div>
+        <div class="c b big" style="position:absolute;left:45px;top:0;width:230px;height:300px;z-index:2"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div><div class="t" style="margin-top:auto;opacity:.6">One use. Play it when you want it.</div></div>
+      </div>
+      <div class="label" style="top:432px">3 of 6 · Wolf! is the hole card</div>
+      <div class="act" style="top:456px;left:45px;right:45px"><div class="p">Play</div></div>
+      <div class="pu" style="position:absolute;left:0;right:0;bottom:66px;margin:0 16px">Draw Power Up · 26 left</div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>4. Spread sheet <span>tap Hand to lay every card out in a grid</span></h2>
+  <p>The main screen only ever shows the hole card. A Hand button with a count opens a sheet with all your Power Ups laid out two across, full faces, readable. Tap one to zoom it and play. Boring in the best way: nothing moves, nothing overlaps, and it works the same with two cards or ten.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c big" style="position:absolute;left:45px;top:92px"><div class="k">Fore-Mat · this hole</div><div class="pts">1-3</div><h4>Wolf!</h4><div class="t">The card player is the Wolf. Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</div></div>
+      <div class="act" style="top:432px"><div style="background:#2a5fb3">Hand · 5</div><div style="background:#2a5fb3">Draw Power Up</div></div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+    <div class="phone" style="background:#0a2414">
+      <div class="top"><i>‹ Back</i><b style="font-size:16px;letter-spacing:.05em">Your hand · 5</b></div>
+      <div class="c b med" style="position:absolute;left:14px;top:70px"><div class="k">Power Up</div><h4>Mulligan!</h4><div class="t">Take a free do-over of any shot.</div></div>
+      <div class="c b med" style="position:absolute;right:14px;top:70px"><div class="k">Power Up</div><h4>Foot Wedge!</h4><div class="t">Advance your ball by kicking it with your foot.</div></div>
+      <div class="c b med" style="position:absolute;left:14px;top:294px"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div></div>
+      <div class="c b med played" style="position:absolute;right:14px;top:294px"><div class="k">Power Up</div><h4>Step Up!</h4><div class="t">Line your ball up toward the flagstick and take 10 steps forward.</div></div>
+      <div class="c b med" style="position:absolute;left:14px;top:518px"><div class="k">Power Up</div><h4>Tee Up!</h4><div class="t">Tee your ball up anywhere for your next shot.</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5. Peek stack <span>cards stacked in your hand, pull the top one up</span></h2>
+  <p>Your hand is a neat stack at the bottom with just the top edges peeking out, titles readable, like cards tucked in a pocket. Tap any edge and that card slides up to full size over the hole card. Swipe it back down to tuck it away. Compact, and the hole card is always visible behind.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c big" style="position:absolute;left:45px;top:84px;height:280px"><div class="k">Fore-Mat · this hole</div><div class="pts">1-3</div><h4>Wolf!</h4><div class="t">The card player is the Wolf. Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</div></div>
+      <div class="c b" style="position:absolute;left:30px;right:30px;top:372px;height:260px;padding:12px 14px"><div class="k">Power Up</div><h4>Mulligan!</h4></div>
+      <div class="c b" style="position:absolute;left:30px;right:30px;top:410px;height:260px;padding:12px 14px"><div class="k">Power Up</div><h4>Foot Wedge!</h4></div>
+      <div class="c b glow" style="position:absolute;left:30px;right:30px;top:448px;height:260px;padding:12px 14px"><div class="k">Power Up</div><h4>Air Horn!</h4></div>
+      <div class="c b played" style="position:absolute;left:30px;right:30px;top:486px;height:260px;padding:12px 14px"><div class="k">Power Up</div><h4>Step Up!</h4></div>
+      <div class="c b" style="position:absolute;left:30px;right:30px;top:524px;height:260px;padding:12px 14px"><div class="k">Power Up</div><h4>Tee Up!</h4></div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c big" style="position:absolute;left:45px;top:84px;height:280px;opacity:.35"><div class="k">Fore-Mat · this hole</div><h4>Wolf!</h4></div>
+      <div class="c b big glow" style="position:absolute;left:45px;top:150px;z-index:2"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div><div class="t" style="margin-top:auto;opacity:.6">One use. Play it when you want it.</div></div>
+      <div class="act" style="top:484px;left:45px;right:45px"><div>Tuck away</div><div class="p">Play</div></div>
+      <div class="c b" style="position:absolute;left:30px;right:30px;top:536px;height:200px;padding:12px 14px;opacity:.5"><div class="k">Power Up</div><h4>Mulligan! · Foot Wedge! · Step Up! · Tee Up!</h4></div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>6. Table view <span>hole card up top, hand as a scrolling row of real cards</span></h2>
+  <p>Like looking down at a table. The hole card sits at the top at half size, and your hand is a row of medium cards you scroll sideways, each one readable on its own without zooming. Tap a card to bring it up full size with Play. The simplest to understand, and every card is always visible at a glance.</p>
+  <div class="row">
+    <div class="phone">
+      <div class="top"><b>FORE</b><i>New Round</i></div>
+      <div class="bar">Draw Fore-Mat · 16 left</div>
+      <div class="c" style="position:absolute;left:16px;right:16px;top:84px;height:120px;padding:12px 14px;flex-direction:row;gap:12px;align-items:flex-start"><div><div class="k">Fore-Mat · this hole</div><h4>Wolf!</h4><div class="t">Everyone hits their tee shot, then the Wolf decides whether to choose a partner or go it alone.</div></div><div class="pts" style="position:static;flex:0 0 auto">1-3</div></div>
+      <div class="label" style="top:216px;text-align:left;left:16px">Your hand · 5</div>
+      <div style="position:absolute;left:0;right:0;top:238px;height:230px;display:flex;gap:10px;padding:0 16px;overflow:hidden">
+        <div class="c b med" style="flex:0 0 auto"><div class="k">Power Up</div><h4>Mulligan!</h4><div class="t">Take a free do-over of any shot.</div></div>
+        <div class="c b med glow" style="flex:0 0 auto"><div class="k">Power Up</div><h4>Air Horn!</h4><div class="t">Distract another player during their swing.</div></div>
+        <div class="c b med played" style="flex:0 0 auto"><div class="k">Power Up</div><h4>Step Up!</h4><div class="t">Line your ball up toward the flagstick…</div></div>
+      </div>
+      <div class="act" style="top:480px;left:16px;right:16px"><div class="p">Play Air Horn!</div></div>
+      <div class="pu" style="position:absolute;left:0;right:0;bottom:66px;margin:0 16px">Draw Power Up · 26 left</div>
+      <div class="nav"><div class="on">Cards</div><div>Scorecard</div></div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
