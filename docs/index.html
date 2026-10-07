@@ -212,8 +212,8 @@
 
   /* ---- the hand: cards fanned along the bottom, deck at the right ---- */
   .fanzone {
-    height: 158px; display: flex; align-items: flex-end; gap: 8px;
-    padding: 0 12px 10px; position: relative;
+    height: 164px; display: flex; align-items: flex-end; gap: 8px;
+    padding: 10px 12px 10px; position: relative;
   }
   .fan { position: relative; flex: 1; height: 100%; min-width: 0; }
   .fancard {
@@ -226,7 +226,7 @@
     box-shadow: 0 6px 14px rgba(0,0,0,.4);
     padding: 14px 8px 6px; overflow: hidden;
     transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--rot, 0deg)) scale(var(--s, 1));
-    transform-origin: 50% 150%;
+    transform-origin: 50% 115%;
     transition: transform .22s cubic-bezier(.2,.9,.3,1.1), box-shadow .22s;
   }
   .fancard .k { font-size: 7px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
@@ -470,7 +470,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.45';
+  var VERSION = '0.1.47';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -649,20 +649,20 @@
       return;
     }
     var W = fanEl.clientWidth || 260;
-    var step = n > 1 ? Math.min(62, (W - 92) / (n - 1)) : 0;
-    var spread = Math.min(7, 30 / n);
+    var step = n > 1 ? Math.min(58, (W - 88 - 44) / (n - 1)) : 0;
+    var spread = Math.min(6, 26 / n);
     var cur = state.view.type === 'hand' ? state.view.i : -1;
     // Held cards arc: the middle sits highest, the edges rest on the bottom.
-    var half = (n - 1) / 2, maxArc = half * half * 1.6;
+    var half = (n - 1) / 2, maxArc = half * half * 1.4;
     state.hand.forEach(function (h, i) {
       var off = i - (n - 1) / 2;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'fancard' + (h.played ? ' played' : '') + (i === cur ? ' on' : '') + (i === popIndex ? ' pop' : '');
       b.style.setProperty('--x', (off * step) + 'px');
-      b.style.setProperty('--y', (i === cur ? -16 : off * off * 1.6 - maxArc) + 'px');
+      b.style.setProperty('--y', (i === cur ? -12 : off * off * 1.4 - maxArc) + 'px');
       b.style.setProperty('--rot', (i === cur ? 0 : off * spread) + 'deg');
-      b.style.setProperty('--s', i === cur ? 1.08 : 1);
+      b.style.setProperty('--s', i === cur ? 1.05 : 1);
       b.style.zIndex = i === cur ? 50 : 10 + i;
       b.innerHTML = '<div class="k">Power Up</div><div class="t">' + esc(BY_ID[h.id].title) + '</div>';
       b.addEventListener('click', function () { if (i === cur) lowerToHand(); else raise(i); });

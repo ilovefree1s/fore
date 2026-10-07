@@ -229,6 +229,7 @@ const sw = swTemplate
 write('sw.js', sw);
 
 write('manifest.webmanifest', JSON.stringify({
+  id: './',
   name: 'FORE',
   short_name: 'FORE',
   description: 'A golf card game. Draw a format card for the hole, hold keeps cards for later.',
@@ -239,9 +240,11 @@ write('manifest.webmanifest', JSON.stringify({
   orientation: 'portrait',
   background_color: THEME,
   theme_color: THEME,
-  icons: icons.filter((s) => s !== 180).map((s) => ({
-    src: `icon-${s}.png`, sizes: `${s}x${s}`, type: 'image/png', purpose: 'any maskable',
-  })),
+  // Chrome wants a plain "any" icon and a separate maskable one, not one entry doing both.
+  icons: [].concat(...icons.filter((s) => s !== 180).map((s) => ([
+    { src: `icon-${s}.png`, sizes: `${s}x${s}`, type: 'image/png', purpose: 'any' },
+    { src: `icon-${s}.png`, sizes: `${s}x${s}`, type: 'image/png', purpose: 'maskable' },
+  ]))),
 }, null, 2));
 
 for (const s of icons) write(`icon-${s}.png`, png(s, iconPixel(s)));
