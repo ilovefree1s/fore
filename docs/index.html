@@ -459,7 +459,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.36';
+  var VERSION = '0.1.37';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -770,12 +770,7 @@
     state.view = { type: 'hole' };
     save();
     render(false);
-    toast('Discarded ' + BY_ID[removed.id].title, function () {
-      state.hand.splice(Math.min(idx, state.hand.length), 0, removed);
-      state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
-      save();
-      render('raise');
-    });
+    toast('Discarded ' + BY_ID[removed.id].title);
   }
   function newRound() {
     openSetup(score.players);

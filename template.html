@@ -770,12 +770,7 @@
     state.view = { type: 'hole' };
     save();
     render(false);
-    toast('Discarded ' + BY_ID[removed.id].title, function () {
-      state.hand.splice(Math.min(idx, state.hand.length), 0, removed);
-      state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
-      save();
-      render('raise');
-    });
+    toast('Discarded ' + BY_ID[removed.id].title);
   }
   function newRound() {
     openSetup(score.players);
