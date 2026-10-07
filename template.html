@@ -293,6 +293,16 @@
   .nexthole:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
   .nexthole:disabled { opacity: .4; }
 
+  /* ---- browse Fore-Mats (phones that do not draw) ---- */
+  .bhead { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bhead .back {
+    padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,.14); color: var(--cream);
+    font-weight: 800; font-size: 15px; flex: 0 0 auto;
+  }
+  .bhead h2 { margin: 0; flex: 1; }
+  .browselist { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-bottom: 8px; }
+  .browselist .card { width: min(100%, 360px); flex: 0 0 auto; }
+
   /* ---- undo toast ---- */
   #toast {
     position: fixed; left: 16px; right: 16px; bottom: calc(100px + var(--safe-bottom)); z-index: 15;
@@ -331,21 +341,6 @@
   .seg button { flex: 1; padding: 11px; border-radius: 11px; background: transparent; color: var(--cream); font-weight: 800; font-size: 15px; }
   .seg button.on { background: var(--cream); color: var(--felt-deep); }
   .modal .why { font-size: 12px; opacity: .7; margin: 8px 2px 0; line-height: 1.4; }
-
-  /* ---- pick a Fore-Mat (phones that do not draw) ---- */
-  .picklist { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-  .pick {
-    display: flex; align-items: center; gap: 12px; text-align: left;
-    padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,.1); color: var(--cream);
-  }
-  .pick.on { background: var(--cream); color: var(--felt-deep); }
-  .pick .t { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; }
-  .pick .t small { display: block; font-weight: 600; font-size: 11px; opacity: .7; letter-spacing: .06em; text-transform: uppercase; }
-  .pick .p { flex: 0 0 auto; background: var(--format); color: #fff; font-weight: 900; font-size: 13px; padding: 4px 9px; border-radius: 999px; }
-  .modal .spacer { flex: 1; min-height: 16px; }
-  .modal .go { padding: 16px; border-radius: 14px; background: var(--gold); color: var(--ink); font-weight: 900; font-size: 18px; }
-  .modal .cancel { margin-top: 8px; padding: 12px; border-radius: 12px; background: transparent; color: var(--cream); font-weight: 700; opacity: .8; }
-  .modal .note { font-size: 12px; opacity: .6; text-align: center; margin: 10px 0 0; }
 
 </style>
 </head>
@@ -394,18 +389,20 @@
     <button id="drawer-me" type="button">Me</button>
     <button id="drawer-other" type="button">Someone else</button>
   </div>
-  <p class="why">There are only 20 Fore-Mats, so one phone should draw them for the group. If someone else draws, this phone gets a Set Fore-Mat button instead, so the hole's card still shows here and on the scorecard.</p>
+  <p class="why">There are only 20 Fore-Mats, so one phone draws them for the group and reads them out. If someone else draws, this phone draws Power Ups and can browse the Fore-Mats to read them.</p>
   <div class="spacer"></div>
   <button id="setup-go" class="go" type="button">Start round</button>
   <button id="setup-cancel" class="cancel" type="button">Cancel</button>
   <p class="note">Starting reshuffles both piles, clears your hand, and clears the scorecard.</p>
 </div>
 
-<div id="pick" class="modal" hidden>
-  <h2>Which Fore-Mat?</h2>
-  <p class="sub">Pick the card the drawer announced for this hole.</p>
-  <div id="picklist" class="picklist"></div>
-  <button id="pick-cancel" class="cancel" type="button">Cancel</button>
+<div id="browse" class="modal" hidden>
+  <div class="bhead">
+    <button id="browse-back" class="back" type="button">&lsaquo; Back</button>
+    <h2>Fore-Mats</h2>
+  </div>
+  <p class="sub">All 18, just to read. The drawer's phone deals them.</p>
+  <div id="browselist" class="browselist"></div>
 </div>
 
 <nav>
@@ -570,7 +567,9 @@
     }
     if (!c) {
       cardEl.className = 'card empty';
-      cardEl.textContent = 'Draw a Fore-Mat card to start the hole.';
+      cardEl.textContent = (typeof settings !== 'undefined' && !settings.drawer)
+        ? 'The drawer’s phone deals the Fore-Mats. Draw your Power Ups here.'
+        : 'Draw a Fore-Mat card to start the hole.';
     } else {
       var r = cardHtml(c);
       cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + cls;
@@ -670,7 +669,7 @@
     showTab('cards');
   }
   document.getElementById('draw-format').addEventListener('click', function () {
-    if (settings.drawer) drawFormat(); else openPick();
+    if (settings.drawer) drawFormat(); else openBrowse();
   });
   document.getElementById('draw-keeps').addEventListener('click', drawPowerUp);
   document.getElementById('shuffle').addEventListener('click', newRound);
@@ -823,39 +822,29 @@
   function saveSettings() {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
   }
-  // The top bar is Draw Fore-Mat on the drawer's phone and Set Fore-Mat everywhere else.
+  // Only the drawer's phone gets the Draw Fore-Mat bar.
   function applyDrawer() {
-    var b = document.getElementById('draw-format');
-    b.querySelector('span').textContent = settings.drawer ? 'Draw Fore-Mat' : 'Set Fore-Mat';
+    document.querySelector('#draw-format span').textContent = settings.drawer ? 'Draw Fore-Mat' : 'Browse Fore-Mats';
     document.getElementById('count-format').hidden = !settings.drawer;
+    render(false);
   }
 
-  // ---------- Pick a Fore-Mat (non-drawer phones) ----------
-  var pickEl = document.getElementById('pick');
-  var pickListEl = document.getElementById('picklist');
-  function openPick() {
-    pickListEl.innerHTML = '';
+  // ---------- Browse Fore-Mats (non-drawer phones): read only ----------
+  var browseEl = document.getElementById('browse');
+  function openBrowse() {
+    var list = document.getElementById('browselist');
+    list.innerHTML = '';
     CARDS.filter(function (c) { return c.pile === 'format'; }).forEach(function (c) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'pick' + (state.hole === c.id ? ' on' : '');
-      b.innerHTML = '<div class="t">' + esc(c.title) + (c.format ? '<small>' + esc(c.format) + '</small>' : '') + '</div>' +
-        '<div class="p">' + esc(c.points) + ' pt' + (String(c.points) === '1' ? '' : 's') + '</div>';
-      b.addEventListener('click', function () { setFormat(c.id); pickEl.hidden = true; });
-      pickListEl.appendChild(b);
+      var r = cardHtml(c);
+      var el = document.createElement('div');
+      el.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '');
+      el.innerHTML = r.html;
+      list.appendChild(el);
     });
-    pickEl.hidden = false;
-    pickEl.scrollTop = 0;
+    browseEl.hidden = false;
+    browseEl.scrollTop = 0;
   }
-  function setFormat(id) {
-    state.hole = id;
-    state.holeCards[score.hole] = id;
-    state.view = { type: 'hole' };
-    play('draw');
-    save();
-    render(true);
-  }
-  document.getElementById('pick-cancel').addEventListener('click', function () { pickEl.hidden = true; });
+  document.getElementById('browse-back').addEventListener('click', function () { browseEl.hidden = true; });
 
   // ---------- New round setup ----------
   var setupEl = document.getElementById('setup');
