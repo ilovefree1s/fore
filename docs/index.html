@@ -398,6 +398,9 @@
   .modal .cancel small { display: block; font-size: 12px; font-weight: 600; opacity: .8; margin-top: 2px; }
   .modal .cancel[hidden] { display: none; }
   .modal .note { font-size: 12px; opacity: .6; text-align: center; margin: 10px 0 0; }
+  .modal.launch { justify-content: center; text-align: center; }
+  .modal.launch .brand { font-size: 44px; letter-spacing: .24em; font-weight: 900; margin: 0 0 4px; text-shadow: 0 3px 0 rgba(0,0,0,.3); }
+  .modal.launch .sub { margin-bottom: 22px; }
 
 </style>
 </head>
@@ -437,6 +440,15 @@
 
 <div id="toast" role="status"><span></span><button type="button">Undo</button></div>
 
+<div id="launch" class="modal launch" hidden>
+  <div class="spacer"></div>
+  <h2 class="brand">FORE</h2>
+  <p class="sub" id="launch-sub"></p>
+  <button id="launch-continue" class="go" type="button">Continue round</button>
+  <button id="launch-new" class="cancel" type="button">New round<small>Pick players and start fresh</small></button>
+  <div class="spacer"></div>
+</div>
+
 <div id="setup" class="modal" hidden>
   <h2>Who's playing?</h2>
   <p class="sub">You plus three. Your name is remembered for next time.</p>
@@ -474,7 +486,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.57';
+  var VERSION = '0.1.58';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -1128,7 +1140,19 @@
   showTab(savedTab === 'score' ? 'score' : 'cards');
   var firstRun = false;
   try { firstRun = !localStorage.getItem(SCORE_KEY) && !localStorage.getItem(STORE_KEY); } catch (e) {}
-  if (firstRun) openSetup(null, true);
+  if (firstRun) {
+    openSetup(null, true);
+  } else {
+    var launchEl = document.getElementById('launch');
+    document.getElementById('launch-sub').textContent =
+      'Hole ' + (score.hole + 1) + ' of ' + HOLES + ' · ' + score.players.join(', ');
+    launchEl.hidden = false;
+    document.getElementById('launch-continue').addEventListener('click', function () { launchEl.hidden = true; });
+    document.getElementById('launch-new').addEventListener('click', function () {
+      launchEl.hidden = true;
+      openSetup(score.players);
+    });
+  }
 
   // Install prompt (Android/desktop Chrome). iOS uses Share > Add to Home Screen.
   var installBtn = document.getElementById('install');
