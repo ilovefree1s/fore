@@ -73,7 +73,14 @@
 
   main {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 4px 16px; gap: 12px; min-height: 0; overflow: hidden;
+    padding: 4px 16px; gap: 10px; min-height: 0; overflow: hidden;
+  }
+  .stage { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .stage .card { width: var(--cardw, 360px); }
+  .card.raise { animation: raise .28s cubic-bezier(.2,.9,.3,1.15); }
+  @keyframes raise {
+    from { transform: translateY(160px) scale(.45); opacity: .4; }
+    to   { transform: none; opacity: 1; }
   }
   .card {
     --accent: #6c6a60;
@@ -182,7 +189,6 @@
   @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-18deg) scale(2); opacity: 0; } }
 
   .actions { display: flex; gap: 10px; width: min(100%, 360px); min-height: 48px; }
-  .actions:empty { display: none; }
   .act {
     flex: 1; padding: 13px 12px; border-radius: 14px; font-weight: 800; font-size: 17px;
     background: rgba(255,255,255,.14); color: var(--cream);
@@ -191,37 +197,61 @@
   .act.danger { background: var(--format); color: #fff; }
   .act:active { filter: brightness(.9); }
 
-  .hand { padding: 6px 0 2px; }
-  .hand.empty { display: none; }
-  .hand .title {
-    padding: 0 16px 6px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
-    text-transform: uppercase; opacity: .85;
+  /* ---- the hand: cards fanned along the bottom, deck at the right ---- */
+  .fanzone {
+    height: 158px; display: flex; align-items: flex-end; gap: 8px;
+    padding: 0 12px 10px; position: relative;
   }
-  .hand .strip {
-    display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 8px;
-    scrollbar-width: none;
+  .fan { position: relative; flex: 1; height: 100%; min-width: 0; }
+  .fancard {
+    --accent: var(--keeps); --accent-dark: #1d4382;
+    position: absolute; left: 50%; bottom: 0; width: 88px; height: 123px; margin-left: -44px;
+    border-radius: 9px; border: 1.5px solid rgba(0,0,0,.25); color: var(--ink); text-align: left;
+    background:
+      repeating-linear-gradient(135deg, var(--accent) 0 6px, var(--accent-dark) 6px 12px) top / 100% 7px no-repeat,
+      linear-gradient(165deg, #f5f8fd, #e2eaf6);
+    box-shadow: 0 6px 14px rgba(0,0,0,.4);
+    padding: 14px 8px 6px; overflow: hidden;
+    transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--rot, 0deg)) scale(var(--s, 1));
+    transform-origin: 50% 150%;
+    transition: transform .22s cubic-bezier(.2,.9,.3,1.1), box-shadow .22s;
   }
-  .hand .strip::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; background: var(--keeps); color: #fff;
-    padding: 9px 13px; border-radius: 12px; font-weight: 700; font-size: 13px;
-    box-shadow: 0 3px 0 rgba(0,0,0,.3); max-width: 60vw;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .fancard .k { font-size: 7px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .fancard .t {
+    font-size: 13px; font-weight: 800; line-height: 1.08; margin-top: 3px;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .chip.on { outline: 3px solid var(--gold); outline-offset: 1px; }
-  .chip.played { background: #6b6b66; text-decoration: line-through; }
-  .chip.played::after {
-    content: 'PLAYED'; margin-left: 8px; font-size: 9px; letter-spacing: .12em;
-    text-decoration: none; color: var(--format); background: #fff; padding: 2px 5px; border-radius: 4px;
-    display: inline-block; vertical-align: 1px;
+  .fancard.played { filter: grayscale(1) brightness(.88); }
+  .fancard.played::after {
+    content: 'PLAYED'; position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%) rotate(-18deg);
+    font-size: 11px; font-weight: 900; letter-spacing: .08em; color: var(--format);
+    border: 2.5px solid var(--format); padding: 2px 5px; border-radius: 4px; background: rgba(251,247,234,.85);
   }
+  .fancard.on { box-shadow: 0 0 0 3px var(--gold), 0 14px 22px rgba(0,0,0,.5); }
+  .fancard.pop { animation: pop .3s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop { from { opacity: 0; margin-bottom: -60px; } }
+  .fan .none {
+    position: absolute; left: 0; right: 0; bottom: 34px; text-align: center;
+    font-size: 12px; opacity: .6; padding: 0 10px;
+  }
+  .deck {
+    flex: 0 0 auto; width: 78px; height: 110px; border-radius: 10px; color: #fff; margin-bottom: 4px;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255,255,255,.18), transparent 46%),
+      repeating-linear-gradient(135deg, #2a5fb3 0 6px, #1d4382 6px 12px);
+    box-shadow: 0 3px 0 #16336a, 0 6px 0 #10264f, 0 10px 18px rgba(0,0,0,.45);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    border: 2px solid rgba(255,255,255,.25);
+  }
+  .deck:active { transform: translateY(4px); box-shadow: 0 1px 0 #16336a, 0 2px 0 #10264f, 0 6px 12px rgba(0,0,0,.45); }
+  .deck span { font-size: 10px; letter-spacing: .18em; font-weight: 800; opacity: .9; }
+  .deck b { font-size: 13px; font-weight: 900; line-height: 1.05; text-align: center; }
+  .deck small { font-size: 10px; font-weight: 700; opacity: .85; margin-top: 3px; }
 
   /* ---- screens and nav ---- */
   .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .screen[hidden] { display: none; }
   .topdraw { padding: 2px 16px 6px; }
-  .bottomdraw { padding: 4px 16px 8px; }
-  .bottomdraw .draw { padding: 13px 12px; }
   .draw {
     width: 100%; padding: 16px 12px; border-radius: var(--radius);
     color: #fff; font-weight: 800; font-size: 20px; letter-spacing: .02em;
@@ -370,15 +400,12 @@
     <button id="draw-format" class="draw format slim" type="button"><span>Draw Fore-Mat</span><small id="count-format"></small></button>
   </div>
   <main>
-    <div id="card" class="card empty">Draw a Fore-Mat card to start the hole.</div>
+    <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
     <div id="actions" class="actions"></div>
   </main>
-  <div id="hand" class="hand empty">
-    <div class="title">Your hand · <span id="hand-count"></span></div>
-    <div id="strip" class="strip"></div>
-  </div>
-  <div class="bottomdraw">
-    <button id="draw-keeps" class="draw keeps" type="button">Draw Power Up<small id="count-keeps"></small></button>
+  <div class="fanzone">
+    <div id="fan" class="fan"></div>
+    <button id="draw-keeps" class="deck" type="button"><span>Draw</span><b>Power Up</b><small id="count-keeps"></small></button>
   </div>
 </section>
 
@@ -494,8 +521,8 @@
 
   var cardEl = document.getElementById('card');
   var actionsEl = document.getElementById('actions');
-  var handEl = document.getElementById('hand');
-  var stripEl = document.getElementById('strip');
+  var fanEl = document.getElementById('fan');
+  var mainEl = document.querySelector('main');
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (ch) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
@@ -536,69 +563,91 @@
     b.addEventListener('click', onClick);
     return b;
   }
-  function render(animate) {
-    PILES.forEach(function (p) {
-      document.getElementById('count-' + p).textContent = state[p].length + ' left';
-    });
-
-    // Hand strip
-    handEl.classList.toggle('empty', state.hand.length === 0);
-    document.getElementById('hand-count').textContent = state.hand.length + (state.hand.length === 1 ? ' card' : ' cards');
-    stripEl.innerHTML = '';
-    state.hand.forEach(function (h, i) {
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'chip' + (state.view.type === 'hand' && state.view.i === i ? ' on' : '') + (h.played ? ' played' : '');
-      chip.textContent = BY_ID[h.id].title;
-      chip.addEventListener('click', function () { showHand(i); });
-      stripEl.appendChild(chip);
-    });
-
-    // Big card and its action buttons
-    actionsEl.innerHTML = '';
-    cardEl.classList.remove('deal');
-    var c = null, cls = '';
+  // The stage shows the hole card, or whichever hand card is raised.
+  function renderStage(animate) {
+    cardEl.classList.remove('deal', 'raise');
+    var c = null, played = false;
     if (state.view.type === 'hand') {
       var h = state.hand[state.view.i];
       c = BY_ID[h.id];
-      actionsEl.appendChild(button('', 'Back', showHole));
-      if (h.played) {
-        cls = ' played';
-        actionsEl.appendChild(button('danger', 'Discard', discardPlayed));
-      } else {
-        actionsEl.appendChild(button('primary', 'Play', playCard));
-      }
+      played = h.played;
     } else if (state.hole) {
       c = BY_ID[state.hole];
     }
     if (!c) {
       cardEl.className = 'card empty';
       cardEl.textContent = (typeof settings !== 'undefined' && !settings.drawer)
-        ? 'The drawer’s phone deals the Fore-Mats. Draw your Power Ups here.'
+        ? 'The drawer\u2019s phone deals the Fore-Mats. Draw your Power Ups here.'
         : 'Draw a Fore-Mat card to start the hole.';
     } else {
       var r = cardHtml(c);
-      cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + cls;
-      cardEl.innerHTML = r.html + (cls ? '<div class="stamp">PLAYED</div>' : '');
+      cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + (played ? ' played' : '');
+      cardEl.innerHTML = r.html + (played ? '<div class="stamp">PLAYED</div>' : '');
     }
     if (animate) {
       void cardEl.offsetWidth;
-      cardEl.classList.add('deal');
+      cardEl.classList.add(animate === 'raise' ? 'raise' : 'deal');
     }
-    var on = stripEl.querySelector('.chip.on');
-    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+  function renderActions() {
+    actionsEl.innerHTML = '';
+    if (state.view.type !== 'hand') return;
+    var h = state.hand[state.view.i];
+    if (!h) return;
+    actionsEl.appendChild(button('', 'Put back', putBack));
+    actionsEl.appendChild(h.played ? button('danger', 'Discard', discardPlayed) : button('primary', 'Play', playCard));
+  }
+  // The fan: every hand card along the bottom in an arc, overlapping more as
+  // the hand grows. The raised card lifts out and gets the gold ring.
+  function renderFan(popIndex) {
+    fanEl.innerHTML = '';
+    var n = state.hand.length;
+    if (!n) {
+      var none = document.createElement('div');
+      none.className = 'none';
+      none.textContent = 'No Power Ups in hand. Tap the deck to draw.';
+      fanEl.appendChild(none);
+      return;
+    }
+    var W = fanEl.clientWidth || 260;
+    var step = n > 1 ? Math.min(62, (W - 92) / (n - 1)) : 0;
+    var spread = Math.min(7, 30 / n);
+    var cur = state.view.type === 'hand' ? state.view.i : -1;
+    // Held cards arc: the middle sits highest, the edges rest on the bottom.
+    var half = (n - 1) / 2, maxArc = half * half * 1.6;
+    state.hand.forEach(function (h, i) {
+      var off = i - (n - 1) / 2;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'fancard' + (h.played ? ' played' : '') + (i === cur ? ' on' : '') + (i === popIndex ? ' pop' : '');
+      b.style.setProperty('--x', (off * step) + 'px');
+      b.style.setProperty('--y', (i === cur ? -16 : off * off * 1.6 - maxArc) + 'px');
+      b.style.setProperty('--rot', (i === cur ? 0 : off * spread) + 'deg');
+      b.style.setProperty('--s', i === cur ? 1.08 : 1);
+      b.style.zIndex = i === cur ? 50 : 10 + i;
+      b.innerHTML = '<div class="k">Power Up</div><div class="t">' + esc(BY_ID[h.id].title) + '</div>';
+      b.addEventListener('click', function () { if (i === cur) putBack(); else raise(i); });
+      fanEl.appendChild(b);
+    });
+  }
+  function render(animate, popIndex) {
+    PILES.forEach(function (p) {
+      document.getElementById('count-' + p).textContent = state[p].length + ' left';
+    });
+    renderStage(animate);
+    renderActions();
+    renderFan(popIndex);
     fitCard();
   }
-  // The card is as big as the space left between the draw buttons allows,
-  // at a 5:7 ratio, capped at 360px wide.
-  var mainEl = document.querySelector('main');
+  // The stage card is as big as the room between the top bar and the fan
+  // allows, at 5:7, capped at 360px wide. The action row always reserves
+  // its height so the card does not jump when one is raised.
   function fitCard() {
-    var actionsH = actionsEl.childElementCount ? actionsEl.offsetHeight + 12 : 0;
-    var avail = mainEl.clientHeight - 8 - actionsH;
+    var avail = mainEl.clientHeight - 8 - 48 - 10;
     var w = Math.min(360, mainEl.clientWidth - 32, Math.floor(avail * 5 / 7));
-    if (w > 0) cardEl.style.width = w + 'px';
+    if (w > 0) mainEl.style.setProperty('--cardw', w + 'px');
   }
-  window.addEventListener('resize', fitCard);
+  window.addEventListener('resize', function () { fitCard(); renderFan(); });
 
   function drawFormat(silent) {
     var before = JSON.stringify(state);
@@ -630,14 +679,14 @@
     state.view = { type: 'hand', i: state.hand.length - 1 };
     play('draw');
     save();
-    render(true);
+    render('raise', state.hand.length - 1);
   }
-  function showHand(i) {
+  function raise(i) {
     state.view = { type: 'hand', i: i };
     save();
-    render(true);
+    render('raise');
   }
-  function showHole() {
+  function putBack() {
     state.view = { type: 'hole' };
     save();
     render(false);
@@ -654,12 +703,12 @@
     var removed = state.hand.splice(idx, 1)[0];
     state.view = { type: 'hole' };
     save();
-    render(true);
+    render(false);
     toast('Discarded ' + BY_ID[removed.id].title, function () {
       state.hand.splice(Math.min(idx, state.hand.length), 0, removed);
       state.view = { type: 'hand', i: Math.min(idx, state.hand.length - 1) };
       save();
-      render(true);
+      render('raise');
     });
   }
   function newRound() {
