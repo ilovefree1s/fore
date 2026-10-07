@@ -757,8 +757,9 @@
   fanEl.addEventListener('pointerup', endScrub);
   fanEl.addEventListener('pointercancel', endScrub);
 
-  // Hide hand: collapses the fan and lowers any raised card, so the phone
-  // can be passed around without showing your cards. Show hand brings it back.
+  // Hide hand: collapses the fan only. A raised card stays up on the stage,
+  // so you can show the group the one you are playing without showing the
+  // rest of your hand. Show hand or drawing a card brings the fan back.
   var handHidden = false;
   function renderHideHand() {
     var b = document.getElementById('hide-hand');
@@ -768,7 +769,6 @@
   }
   document.getElementById('hide-hand').addEventListener('click', function () {
     handHidden = !handHidden;
-    if (handHidden && state.view.type === 'hand') { state.view = { type: 'hole' }; save(); }
     renderHideHand();
     render(false);
   });
