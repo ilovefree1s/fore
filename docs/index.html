@@ -419,7 +419,7 @@
   <main>
     <div id="stage" class="stage"><div id="card" class="card empty"></div></div>
     <div id="actions" class="actions">
-      <button id="draw-keeps" class="act draw" type="button">Draw Power Up<small id="count-keeps"></small></button>
+      <button id="draw-keeps" class="act draw" type="button">Draw card<small id="count-keeps"></small></button>
       <button id="putback" class="act quiet" type="button">Return card<small>to top of deck</small></button>
     </div>
     <div id="swipehint" class="swipehint" hidden>&#8595; Swipe the raised card down to lower it into your hand</div>
@@ -470,7 +470,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.42';
+  var VERSION = '0.1.43';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
