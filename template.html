@@ -962,6 +962,7 @@
   // stepper is the whole interface. Negative is allowed for penalties.
   var SCORE_KEY = 'fore.score.v1';
   var HOLES = 18;
+  var PTS_MAX = 3; // no hole is worth more than 3 to one player
   var scoreEl = document.getElementById('screen-score');
   function emptyScores(n) {
     var out = [];
@@ -986,7 +987,7 @@
       s.scores = s.scores.map(function (row) {
         row = Array.isArray(row) ? row.slice(0, PLAYERS) : [];
         while (row.length < PLAYERS) row.push(0);
-        return row.map(function (v) { return typeof v === 'number' && isFinite(v) ? v : 0; });
+        return row.map(function (v) { return typeof v === 'number' && isFinite(v) ? Math.min(PTS_MAX, v) : 0; });
       });
       s.hole = Math.min(Math.max(0, s.hole | 0), HOLES - 1);
       return s;
@@ -1044,7 +1045,7 @@
         '<div class="steps">' +
         '<button class="step minus" data-act="pt" data-i="' + i + '" data-n="-1">&minus;</button>' +
         '<div class="num' + (v === 0 ? ' zero' : '') + '">' + v + '</div>' +
-        '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1">+</button>' +
+        '<button class="step plus" data-act="pt" data-i="' + i + '" data-n="1"' + (v >= PTS_MAX ? ' disabled' : '') + '>+</button>' +
         '</div></div>';
     });
     html += '<button class="nexthole" data-act="next"' + (h >= HOLES - 1 ? ' disabled' : '') + '>Next hole &rsaquo;</button>' +
@@ -1074,7 +1075,7 @@
       if (score.hole >= HOLES - 1) return;
       score.hole += 1;
     } else if (act === 'pt') {
-      score.scores[score.hole][i] += n;
+      score.scores[score.hole][i] = Math.min(PTS_MAX, score.scores[score.hole][i] + n);
     }
     saveScore();
     renderScore();
