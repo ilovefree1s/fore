@@ -550,7 +550,7 @@
     return ids;
   }
   function freshState() {
-    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), hole: null, hand: [], view: { type: 'hole' }, holeCards: {} };
+    return { format: shuffledPile('format'), keeps: shuffledPile('keeps'), hole: null, hand: [], view: { type: 'hole' }, holeCards: {}, holeBy: {}, turn: 0, holeOwner: null };
   }
   function validIds(list, pile) {
     return Array.isArray(list) && list.every(function (id) { return BY_ID[id] && BY_ID[id].pile === pile; });
@@ -572,6 +572,13 @@
         });
       }
       s.holeCards = hc;
+      var hb = {};
+      if (s.holeBy && typeof s.holeBy === 'object') {
+        Object.keys(s.holeBy).forEach(function (k) { if (typeof s.holeBy[k] === 'string') hb[k] = s.holeBy[k]; });
+      }
+      s.holeBy = hb;
+      s.turn = typeof s.turn === 'number' ? s.turn : 0;
+      s.holeOwner = typeof s.holeOwner === 'string' ? s.holeOwner : null;
       if (!s.view || (s.view.type === 'hand' && !(s.view.i >= 0 && s.view.i < s.hand.length))) s.view = { type: 'hole' };
       return s;
     } catch (e) { return null; }
@@ -591,7 +598,7 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
     });
   }
-  function cardHtml(c) {
+  function cardHtml(c, owner) {
     var chars = 0;
     var body = '';
     c.body.forEach(function (b) {
@@ -607,7 +614,7 @@
         chars += b.text.length;
       }
     });
-    var html = '<div class="pile">' + (c.pile === 'format' ? 'Fore-Mat' : 'Power Up') + '</div>';
+    var html = '<div class="pile">' + (c.pile === 'format' ? (owner ? esc(owner) + '’s Fore-Mat' : 'Fore-Mat') : 'Power Up') + '</div>';
     if (c.points != null) {
       html += '<div class="points' + (String(c.points).length > 2 ? ' wide' : '') + '">' + esc(c.points) + '<small>PTS</small></div>';
     }
@@ -641,7 +648,7 @@
         ? 'The drawer\u2019s phone deals the Fore-Mats. Draw your Power Ups here.'
         : 'Draw a Fore-Mat card to start the hole.';
     } else {
-      var r = cardHtml(c);
+      var r = cardHtml(c, c.pile === 'format' ? state.holeOwner : null);
       cardEl.className = 'card ' + c.pile + (r.xlong ? ' long xlong' : r.long ? ' long' : '') + (played ? ' played' : '');
       cardEl.innerHTML = r.html + (played ? '<div class="stamp">PLAYED</div>' : '');
     }
@@ -781,7 +788,8 @@
     render(false);
   });
   function render(animate, popIndex) {
-    document.getElementById('count-format').textContent = state.format.length + ' left';
+    document.getElementById('count-format').textContent =
+      (score && score.players ? score.players[state.turn % score.players.length] + '’s turn · ' : '') + state.format.length + ' left';
     renderStage(animate);
     renderActions();
     renderFan(popIndex);
@@ -807,8 +815,12 @@
       state.format.splice(Math.floor(Math.random() * state.format.length), 0, id);
       id = state.format.pop();
     }
+    var who = score.players[state.turn % score.players.length];
+    state.turn = (state.turn + 1) % score.players.length;
     state.hole = id;
+    state.holeOwner = who;
     state.holeCards[score.hole] = id;
+    state.holeBy[score.hole] = who;
     state.view = { type: 'hole' };
     play('draw');
     save();
@@ -1006,7 +1018,8 @@
         var fc = state.holeCards[h] ? BY_ID[state.holeCards[h]] : null;
         var t = holeTotal(h);
         var awarded = t ? t + ' awarded' : 'none awarded yet';
-        return fc ? esc(fc.title) + ' &middot; ' + esc(fc.points) + ' pt' + (String(fc.points) === '1' ? '' : 's') + ' &middot; ' + awarded
+        var by = state.holeBy[h] ? esc(state.holeBy[h]) + '’s ' : '';
+        return fc ? by + esc(fc.title) + ' &middot; ' + esc(fc.points) + ' pt' + (String(fc.points) === '1' ? '' : 's') + ' &middot; ' + awarded
                   : 'No Fore-Mat drawn for this hole';
       }()) + '</span></div>' +
       '<button class="step" data-act="hole" data-n="' + (h + 1) + '"' + (h < HOLES - 1 ? '' : ' disabled') + '>&rsaquo;</button>' +
