@@ -1050,10 +1050,11 @@
     html += '<button class="nexthole" data-act="next"' + (h >= HOLES - 1 ? ' disabled' : '') + '>Next hole &rsaquo;</button>' +
       '<div class="hint">' + (h >= HOLES - 1 ? 'Last hole.' : 'Draw the next Fore-Mat from the Cards tab when you get to the tee.') + '</div>' +
       '<div class="holestrip" id="holestrip">';
+    // Each chip shows your own points for that hole (you are Player 1).
     for (var hc = 0; hc < HOLES; hc++) {
-      var t = holeTotal(hc);
+      var t = holeTotal(hc), mine = s.scores[hc][0];
       html += '<button class="holechip' + (hc === h ? ' on' : '') + (t ? ' done' : '') + '" data-act="hole" data-n="' + hc + '">' +
-        '<strong>' + (hc + 1) + '</strong><span>' + (t ? t + ' pt' + (t === 1 ? '' : 's') : '&ndash;') + '</span></button>';
+        '<strong>' + (hc + 1) + '</strong><span>' + (t ? 'you · ' + mine : '&ndash;') + '</span></button>';
     }
     html += '</div>';
     scoreEl.innerHTML = html;
