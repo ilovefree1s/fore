@@ -285,9 +285,12 @@
   .draw.format { background: var(--format); }
   .draw.keeps { background: var(--keeps); }
   .draw.slim {
-    flex-direction: row; justify-content: center; gap: 8px;
-    padding: 11px 8px; font-size: 15px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3); white-space: nowrap;
+    flex-direction: column; justify-content: center; gap: 1px;
+    padding: 8px 8px; font-size: 15px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,.3); white-space: nowrap;
+    overflow: hidden;
   }
+  .draw.slim small { font-size: 11px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .draw.slim small:empty { display: none; }
   .draw.slim:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
   nav { padding: 8px 16px calc(10px + var(--safe-bottom)); background: rgba(0,0,0,.22); }
   nav .tabs { display: flex; gap: 8px; }
@@ -512,7 +515,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.65';
+  var VERSION = '0.1.66';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
