@@ -487,3 +487,14 @@ Scramble/Shamble Rule:
 - Does not count as a stroke.
 - You must use the card from your own ball.
 - After the throw, both partners may play from the resulting location.
+
+## Code Words!
+
+Give this card to another player.
+
+That player cannot say "yes" or "no" for the rest of the hole. Any
+variation of yes or no counts.
+
+Penalty:
+- 1-point penalty every time they say one.
+- Once their ball is in the hole, the hole is over.
