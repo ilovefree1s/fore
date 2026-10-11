@@ -490,7 +490,7 @@ Scramble/Shamble Rule:
 
 ## Code Words!
 
-Give this card to another player.
+Play this card on another player.
 
 That player cannot say "yes" or "no" for the rest of the hole. Any
 variation of yes or no counts.
