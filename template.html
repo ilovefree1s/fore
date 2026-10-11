@@ -520,6 +520,7 @@
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
   var STORE_KEY = 'fore.deck.v2';
+  var HAND_MAX = 7;
   var PILES = ['format', 'keeps'];
 
   var sounds = {
@@ -664,7 +665,11 @@
     var raised = state.view.type === 'hand' ? state.hand[state.view.i] : null;
     document.getElementById('swipehint').hidden = !raised;
     document.getElementById('putback').disabled = !(raised && !raised.played);
-    document.getElementById('count-keeps').textContent = state.keeps.length + ' left';
+    var full = state.hand.length >= HAND_MAX;
+    var drawBtn = document.getElementById('draw-keeps');
+    drawBtn.disabled = full;
+    drawBtn.firstChild.textContent = full ? 'Hand full' : 'Draw card';
+    document.getElementById('count-keeps').textContent = full ? HAND_MAX + ' of ' + HAND_MAX : state.keeps.length + ' left · ' + state.hand.length + ' of ' + HAND_MAX;
   }
   // The bottom-left button is whatever you would do next on this screen:
   // draw when nothing is raised, Play or Discard for the raised card, and
@@ -830,6 +835,7 @@
     render(true);
   }
   function drawPowerUp() {
+    if (state.hand.length >= HAND_MAX) return;
     if (handHidden) { handHidden = false; renderHideHand(); }
     if (!state.keeps.length) state.keeps = shuffledPile('keeps');
     state.hand.push({ id: state.keeps.pop(), played: false });
