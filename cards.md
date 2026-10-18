@@ -498,3 +498,13 @@ variation of yes or no counts.
 Penalty:
 - 1 stroke penalty every time they say one.
 - Once their ball is in the hole, the hole is over.
+
+## Question Master!
+
+You are the Question Master for the rest of the hole.
+
+If you ask any question and another player answers it, that player takes
+a 1 stroke penalty.
+
+Penalty:
+- 1 stroke penalty every time someone answers one of your questions.
