@@ -304,7 +304,8 @@
   nav .tabs button.danger { background: var(--format); color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
   nav .tabs button.draw:active, nav .tabs button.play:active, nav .tabs button.danger:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
   nav .tabs button small { display: block; font-size: 11px; font-weight: 600; opacity: .85; margin-top: 1px; }
-  .status { margin-top: 6px; text-align: center; font-size: 11px; opacity: .75; }
+  .status { margin-top: 6px; display: flex; justify-content: space-between; gap: 8px; font-size: 11px; opacity: .75; }
+  #version { font-weight: 700; }
 
   /* ---- scorecard ---- */
   #screen-score { overflow: auto; padding: 4px 16px 8px; }
@@ -508,7 +509,7 @@
     <button id="tab-cards" class="on" type="button">Cards</button>
     <button id="tab-score" type="button">Scorecard</button>
   </div>
-  <div class="status"><span id="version"></span> · <span id="offline">checking offline support</span></div>
+  <div class="status"><span id="offline">checking offline support</span><span id="version"></span></div>
 </nav>
 
 <!--CARDS-->
