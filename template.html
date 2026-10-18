@@ -221,7 +221,8 @@
     height: 164px; display: flex; align-items: flex-end; gap: 8px;
     padding: 10px 12px 10px; position: relative;
   }
-  .fan { position: relative; flex: 1; height: 100%; min-width: 0; }
+  /* isolate keeps the hand's card layering inside the fan, so popups always cover it */
+  .fan { position: relative; flex: 1; height: 100%; min-width: 0; isolation: isolate; }
   .fancard {
     --accent: var(--keeps); --accent-dark: #1d4382;
     position: absolute; left: 50%; bottom: 0; width: 88px; height: 123px; margin-left: -44px;
