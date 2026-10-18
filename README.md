@@ -5,7 +5,8 @@ card, show the group. Modeled on the FORE! Cards deck, for regular ball golf.
 
 - **Fore-Mat cards** set the format for the whole hole, then expire. Each is worth points.
 - **Power Up cards** go into your hand when drawn. You start the round with 2.
-  After that, locking a hole on the Scorecard earns one draw. Tap one, hit Play to show the group, then Discard.
+  After that, locking a hole on the Scorecard earns draws: 1 if you won or
+  tied for the win, 2 otherwise. Tap one, hit Play to show the group, then Discard.
 - **Scorecard** tab tracks points per hole per player, with running totals and a LEAD tag. Points, not strokes.
 
 ## Layout

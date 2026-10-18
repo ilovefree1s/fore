@@ -517,7 +517,7 @@
 <script>
 (function () {
   'use strict';
-  var VERSION = '0.1.78';
+  var VERSION = '0.1.80';
   var CARDS = JSON.parse(document.getElementById('cards-data').textContent);
   var BY_ID = {};
   CARDS.forEach(function (c) { BY_ID[c.id] = c; });
@@ -1015,6 +1015,12 @@
     for (var h = 0; h < HOLES; h++) t += score.scores[h][i];
     return t;
   }
+  // Draws earned by locking a hole, for you (Player 1): winning or tying for
+  // the win earns 1, anything below the top earns 2.
+  function drawsFor(h) {
+    var row = score.scores[h];
+    return row[0] >= Math.max.apply(null, row) ? 1 : 2;
+  }
   function holeTotal(h) {
     return score.scores[h].reduce(function (a, b) { return a + b; }, 0);
   }
@@ -1064,10 +1070,10 @@
     });
     html += (locked
         ? '<button class="nexthole" data-act="next"' + (h >= HOLES - 1 ? ' disabled' : '') + '>&#128274; Hole ' + (h + 1) + ' locked &middot; Next hole &rsaquo;</button>'
-        : '<button class="nexthole lockhole" data-act="lock">&#128274; Lock hole ' + (h + 1) + ' &middot; earn a draw</button>') +
+        : '<button class="nexthole lockhole" data-act="lock">&#128274; Lock hole ' + (h + 1) + ' &middot; draw ' + drawsFor(h) + '</button>') +
       '<div class="hint">' + (locked
         ? (h >= HOLES - 1 ? 'Last hole.' : 'Draw the next Fore-Mat from the Cards tab when you get to the tee.')
-        : 'Lock the hole when the points are final. Locking earns you one Power Up draw.') + '</div>' +
+        : 'Lock the hole when the points are final. Win or tie for the win: draw 1. Otherwise: draw 2.') + '</div>' +
       '<div class="holestrip" id="holestrip">';
     // Each chip shows your own points for that hole (you are Player 1).
     for (var hc = 0; hc < HOLES; hc++) {
@@ -1095,13 +1101,14 @@
     } else if (act === 'lock') {
       var lh = score.hole;
       if (score.locked[lh]) return;
+      var earned = drawsFor(lh);
       score.locked[lh] = true;
-      state.draws += 1;
+      state.draws += earned;
       save();
       render(false);
-      toast('Hole ' + (lh + 1) + ' locked · +1 draw', function () {
+      toast('Hole ' + (lh + 1) + ' locked · +' + earned + (earned === 1 ? ' draw' : ' draws'), function () {
         score.locked[lh] = false;
-        state.draws = Math.max(0, state.draws - 1);
+        state.draws = Math.max(0, state.draws - earned);
         save(); saveScore(); renderScore(); render(false);
       });
     } else if (act === 'pt') {
